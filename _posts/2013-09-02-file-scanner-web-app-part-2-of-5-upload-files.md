@@ -6,11 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1378167016'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
-  _oembed_d84d71c47ba0da28650347484a69ebb6: ! '{{unknown}}'
 ---
 <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-1-of-5-stand-up-and-webserver/">Part 1</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-2-of-5-upload-files/">Part 2</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-3-of-5-yara-signatures/">Part 3</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-4-of-5-scanning-files-from-the-web-app/">Part 4</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-5-of-5-finishing-touches/">Part 5</a>
 
@@ -25,47 +20,50 @@ https://raw.github.com/enyo/dropzone/master/downloads/dropzone.js
 
 Now, let's edit our ugly <tt>index.htm</tt> to do something.
 
-[sourcecode lang="html" gutter="false"]
-&lt;html&gt;
-&lt;head&gt;
-	&lt;script src=&quot;/dropzone.js&quot;&gt;&lt;/script&gt;
+{% highlight html %}
+<html>
+<head>
+  <script src="/dropzone.js"></script>
 
-	&lt;style&gt;
-	.dropzone {
-		border-style:dotted; 
-		border-width:2px;
-		min-height: 100px;
-		height:100px;
-	}
-	&lt;/style&gt;
-&lt;/head&gt;
+  <style>
+  .dropzone {
+    border-style:dotted; 
+    border-width:2px;
+    min-height: 100px;
+    height:100px;
+  }
+  </style>
+</head>
 
-&lt;body&gt;
-	&lt;h1&gt;File Scanner&lt;/h1&gt;
+<body>
+  <h1>File Scanner</h1>
 
-	&lt;form action=&quot;/file-upload&quot;
-	      class=&quot;dropzone&quot;
-	      id=&quot;mydropzone&quot;&gt;&lt;/form&gt;
-&lt;/body&gt;
+  <form action="/file-upload"
+        class="dropzone"
+        id="mydropzone"></form>
+</body>
 
-&lt;script&gt;
+<script>
 Dropzone.options.mydropzone = {
-  previewTemplate : '&lt;div class=&quot;preview file-preview&quot;&gt;\
-  &lt;div class=&quot;dz-details&quot;&gt;\
-    &lt;b class=&quot;dz-filename&quot;&gt;&lt;span data-dz-name&gt;&lt;/span&gt;&lt;/b&gt;\
-    &lt;b class=&quot;dz-size&quot; data-dz-size&gt;&lt;/b&gt;\
-  &lt;/div&gt;\
-  &lt;div class=&quot;dz-progress&quot;&gt;&lt;span class=&quot;dz-upload&quot; data-dz-uploadprogress&gt;&lt;/span&gt;&lt;/div&gt;\
-  &lt;div class=&quot;dz-error-message&quot;&gt;&lt;span data-dz-errormessage&gt;&lt;/span&gt;&lt;/div&gt;',
+  previewTemplate : '<div class="preview file-preview">\
+  <div class="dz-details">\
+    <b class="dz-filename"><span data-dz-name></span></b>\
+    <b class="dz-size" data-dz-size></b>\
+  </div>\
+  <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>\
+  <div class="dz-error-message"><span data-dz-errormessage></span></div>',
   init: function() {
-    this.on(&quot;complete&quot;, function(file) { console.log(&quot;Upload complete&quot;); });
+    this.on("complete", function(file) { console.log("Upload complete"); });
   }
 };
-&lt;/script&gt;
-[/sourcecode] 
+</script>
+{% endhighlight %}
 
 Edit <tt>webserver.py</tt> to contain the following and restart the process.
-[sourcecode lang="python" gutter="false" highlight="10,11,12,13,14,15,18"]
+
+(highlight="10,11,12,13,14,15,18")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
  
 import tornado.ioloop
@@ -73,27 +71,27 @@ import tornado.web
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
 
 
 class UploadHandler(tornado.web.RequestHandler):
     def post(self):
         file_contents = self.request.files['file'][0].body
-        with open(&quot;uploads/file&quot;, &quot;wb&quot;) as f:
+        with open("uploads/file", "wb") as f:
             f.write(file_contents)
         self.finish()
 
  
 application = tornado.web.Application([
-    (r&quot;/file-upload&quot;, UploadHandler),
-    (r&quot;/&quot;, MainHandler),
+    (r"/file-upload", UploadHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 Now you can either drag and drop files to your webpage (inside the dotted box) or click inside the dotted box and it will pop-up a file explorer view so you can select a file to upload.  The file will be uploaded as <tt>/var/apps/scanner/uploads/file</tt>.  So now we'll need to do something to give unique filenames.
 
@@ -126,7 +124,9 @@ Initially, all we'll do in our database is store the filename given to us, and w
 <h3>Upload files with unique names</h3>
 Now we need to modify our <tt>webserver.py</tt> to use our database.
 
-[sourcecode lang="python" gutter="false" highlight="14,16,18,19,20,21,23,27,28,29,30,31"]
+(highlight="14,16,18,19,20,21,23,27,28,29,30,31")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
  
 import tornado.ioloop
@@ -136,7 +136,7 @@ import MySQLdb
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
 
 
 class UploadHandler(tornado.web.RequestHandler):
@@ -145,32 +145,32 @@ class UploadHandler(tornado.web.RequestHandler):
         file_contents = self.request.files['file'][0].body
         file_size = len(file_contents)
 
-        stmt = &quot;INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)&quot;
+        stmt = "INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)"
         cur.execute(stmt, {'filename': file_name, 'filesize': file_size})
         file_id = cur.lastrowid
         db.commit()
 
-        with open(&quot;uploads/%s&quot; % file_id, &quot;wb&quot;) as f:
+        with open("uploads/%s" % file_id, "wb") as f:
             f.write(file_contents)
         self.finish()
 
 
-db = MySQLdb.connect(host=&quot;localhost&quot;,
-                     user=&quot;root&quot;,
-                      passwd=&quot;mypassword&quot;,
-                      db=&quot;scanner&quot;)
+db = MySQLdb.connect(host="localhost",
+                     user="root",
+                      passwd="mypassword",
+                      db="scanner")
 cur = db.cursor()
  
 application = tornado.web.Application([
-    (r&quot;/file-upload&quot;, UploadHandler),
-    (r&quot;/&quot;, MainHandler),
+    (r"/file-upload", UploadHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 We'll fill in the MD5 hash later.  For now, try uploading some files, and ensure they should up with ID's for names in <tt>uploads</tt>, and you can check the mysql using <tt>select * from files</tt>.
 

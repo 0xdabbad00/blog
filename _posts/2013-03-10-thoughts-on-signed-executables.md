@@ -31,7 +31,7 @@ I used Didier Stevens' <a href="http://blog.didierstevens.com/programs/authentic
 I scanned my Windows 7 system (a VM with some development tools) for all files that begin with an "MZ" header, and then checked if they were signed and by who.  I found there were 36 signers, which seems fairly reasonable to keep track of.  There were 23992 executables (these end up being .exe, .dll, .sys, and some other files), of which only 1962 (8.2%) were not signed.  It is important to note that not all of these are unique because Windows caches and copies files in various places.  These numbers could be completely different from system to system as well, but you have to start with some data.  For the unsigned binaries, a lot of files came from "C:\Windows\assembly" (915 files), "C:\Windows\sxs" (117 files), "C:\Program Files\Git" (310 files, basically a minimal cygwin install), and other various locations.
 
 For the signers, the breakdown looks like this (I got tired as I was doing some manual effort to correlate these things, and honestly, there is a lot more analysis that needs to be put into this for this to be very meaningful, but the main point is that a lot of stuff is signed by Microsoft already):
-<pre>
+{% highlight text %}
   Count, Thumbprint,                             , Subject name
   11820, 02eceea9d5e0a9f3e39b6f4ec3f7131ed4e352c4, C=US, S=Washington, L=Redmond, O=Microsoft Corporation, OU=MOPR, CN=Microsoft Windows
    4925, 018b222e21fbb2952304d04d1d87f736ed46dea4, C=US, S=Washington, L=Redmond, O=Microsoft Corporation, OU=MOPR, CN=Microsoft Windows
@@ -69,4 +69,4 @@ For the signers, the breakdown looks like this (I got tired as I was doing some 
       1, 8849d1c0f147a3c8327b4038783aec3e06c76f5b,
       1, 1e039f8c2bcb0d13fc5459957ecc5b9b7a271041,
       1, 1017a37c5edfd1da9d3a435ea7767d5e3a5a8daa,
-</pre>
+{% endhighlight %}

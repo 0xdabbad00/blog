@@ -6,10 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1378167050'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-1-of-5-stand-up-and-webserver/">Part 1</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-2-of-5-upload-files/">Part 2</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-3-of-5-yara-signatures/">Part 3</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-4-of-5-scanning-files-from-the-web-app/">Part 4</a>, <a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-5-of-5-finishing-touches/">Part 5</a>
 
@@ -142,10 +138,11 @@ def connectToDB():
 	                      db="scanner")
 	cur = db.cursor()
 	return cur, db
-[/sourcecode]
+{% endhighlight %}
 
 Next, we have <tt>updaterules.py</tt> for adding the rules.
-[sourcecode lang="python" gutter="false"]
+
+{% highlight python %}
 #!/usr/bin/python
 # file: updaterules.py
 

@@ -6,10 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1378167213'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 If you're like me, your daily in-take of infosec news high-lights new vulns, things broken, and maybe some reverse engineering of some malware, but my day-to-day life is as a software developer in the infosec world.  I build software, and I'm going to show you how to quickly stand up something useful using many of the technologies I use in my day-to-day life.
 
@@ -73,7 +69,8 @@ Let's add the host-only network adapter.  If the following instructions get conf
 sudo ifconfig eth1 192.168.56.101 netmask 255.255.255.0 up
 </pre>
 That is a temporary fix that will not survive reboot.  You can now ssh in though.  To make this change permanent edit the file <tt>/etc/network/interfaces</tt> to add the following:
-<pre>
+
+{% highlight text %}
 # The host-only network interface
 auto eth1
 iface eth1 inet static
@@ -81,7 +78,8 @@ address 192.168.56.101
 netmask 255.255.255.0
 network 192.168.56.0
 broadcast 192.168.56.255
-</pre>
+{% endhighlight %}
+
 </ol>
 You can now ssh in.  Do that, because working through VitualBox's console display is annoying.  You can also edit your <tt>/etc/hosts</tt> file now if you want so you don't have to remember the IP address.
 <li><b>Update it.</b> You're in infosec, so make sure your stuff is patched.  Everything should be up-to-date if you just downloaded the latest, but run the following anyway:
@@ -116,7 +114,8 @@ sudo easy_install tornado
 </pre>
 
 Create the directory <tt>/var/apps/scanner</tt> to work in.  Create a file there named <tt>webserver.py</tt> with the following contents:
-[sourcecode lang="python" gutter="false"]
+
+{% highlight python %}
 #!/usr/bin/python
 
 import tornado.ioloop
@@ -124,16 +123,16 @@ import tornado.web
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(&quot;Hello world&quot;)
+        self.write("Hello world")
 
 application = tornado.web.Application([
-    (r&quot;/&quot;, MainHandler),
+    (r"/", MainHandler),
 ])
 
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 Run it with:
 <pre>
@@ -148,7 +147,10 @@ Reading our code from the bottom up, it is simply saying "Create a web server on
 
 <h3>Turn it into a static file server</h3>
 Right now, your webserver can't display any files.  It can only respond with "Hello world" and only if the client  tries to access "/".  Otherwise it gives a 404.  Let's turn our server into a static file server by killing the "python webserver.py" process, replacing the <tt>webserver.py</tt> file with the following and starting the process back up.
-[sourcecode lang="python" gutter="false" highlight="8,12"]
+
+(highlight="8,12")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
  
 import tornado.ioloop
@@ -156,23 +158,23 @@ import tornado.web
  
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
  
 
 application = tornado.web.Application([
-    (r&quot;/&quot;, MainHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 Now create a directory <tt>/var/apps/scanner/static</tt> and create a <tt>index.htm</tt> file there.  For example:
-[sourcecode gutter="false"]
+{% highlight text %}
 echo &quot;&lt;html&gt;&lt;body bgcolor=yellow&gt;This is static&quot; &gt; /var/apps/scanner/static/index.htm
-[/sourcecode]
+{% endhighlight %}
 
 After starting the service back up, visit <a href="http://192.168.56.101:8000/">http://192.168.56.101:8000/</a> and you should see an ugly site with your text.
 
@@ -180,7 +182,10 @@ Tornado caches your files, so any time you edit that static <tt>index.htm</tt> f
 
 <h3>Handlers</h3>
 To give you a feel for how handlers in Tornado work, let's add two additional ones to our code.
-[sourcecode lang="python" gutter="false" highlight="5,11,12,13,15,16,17,20,21"]
+
+(highlight="5,11,12,13,15,16,17,20,21")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
  
 import tornado.ioloop
@@ -190,28 +195,28 @@ from datetime import datetime
  
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
 
 class TimeHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write(&quot;%s&quot; % datetime.now())
+        self.write("%s" % datetime.now())
  
 class AdditionHandler(tornado.web.RequestHandler):
     def get(self, num1, num2):
-        self.write(&quot;%d&quot; % (int(num1)+int(num2)))
+        self.write("%d" % (int(num1)+int(num2)))
 
  
 application = tornado.web.Application([
-    (r&quot;/time&quot;, TimeHandler),
-    (r&quot;/add/([0-9]+)\+([0-9]+)&quot;, AdditionHandler),
-    (r&quot;/&quot;, MainHandler),
+    (r"/time", TimeHandler),
+    (r"/add/([0-9]+)\+([0-9]+)", AdditionHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 The first new handler (<tt>TimeHandler</tt>) at <a href="http://192.168.56.101:8000/time">http://192.168.56.101:8000/time"</a> shows you how easy it is to get your own python code running whenever the client visits one of our registered handlers.
 
