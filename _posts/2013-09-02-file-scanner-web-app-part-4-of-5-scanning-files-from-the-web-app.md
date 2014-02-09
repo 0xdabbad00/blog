@@ -27,7 +27,9 @@ sudo pip install pika==0.9.8
 <h3>The Producer</h3>
 First we'll make our web app queue messages.  I'm also using our new <tt>utils.py</tt> library now.
 
-[sourcecode lang="python" gutter="false" highlight="7,8,29,30,31,32,33,34,35,36,37,39"]
+(highlight="7,8,29,30,31,32,33,34,35,36,37,39")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
 # file: webserver.py
  
@@ -39,7 +41,7 @@ import pika
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
 
 
 class UploadHandler(tornado.web.RequestHandler):
@@ -48,12 +50,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file_contents = self.request.files['file'][0].body
         file_size = len(file_contents)
 
-        stmt = &quot;INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)&quot;
+        stmt = "INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)"
         cur.execute(stmt, {'filename': file_name, 'filesize': file_size})
         file_id = cur.lastrowid
         db.commit()
 
-        with open(&quot;uploads/%s&quot; % file_id, &quot;wb&quot;) as f:
+        with open("uploads/%s" % file_id, "wb") as f:
             f.write(file_contents)
         self.finish()
 
@@ -71,28 +73,30 @@ class UploadHandler(tornado.web.RequestHandler):
 cur, db = utils.connectToDB()
  
 application = tornado.web.Application([
-    (r&quot;/file-upload&quot;, UploadHandler),
-    (r&quot;/&quot;, MainHandler),
+    (r"/file-upload", UploadHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 Run the web server, upload a file, and check that our queue has one message in it by running the following:
 <pre>
-<b>sudo rabbitmqctl list_queues</b>
+<b>sudo rabbitmqctl list\_queues</b>
 Listing queues ...
-uploaded_files	1
+uploaded\_files	1
 ...done.
 </pre>
 
 <h3>The Consumer</h3>
 Now we'll fix up our file <tt>yarascanner.py</tt> to consume these work messages.
 
-[sourcecode lang="python" gutter="false" highlight="8,43,44,45,46,47,49,50,51,52,53,54,55,57,58"]
+(highlight="8,43,44,45,46,47,49,50,51,52,53,54,55,57,58")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
 # file: yarascanner.py
 
@@ -103,29 +107,29 @@ from os import path
 import pika
 
 def scanFile(file_id):
-    print &quot;Scanning file %d&quot; % file_id
+    print "Scanning file %d" % file_id
     filename = '%s' % file_id
     matches = rules.match(path.join('uploads', filename))
     print matches
 
     for match in matches:
-        stmt = &quot;SELECT id FROM rules WHERE name = %(name)s AND enabled=1&quot;
+        stmt = "SELECT id FROM rules WHERE name = %(name)s AND enabled=1"
         cur.execute(stmt, {'name': match})
         rule_id = cur.fetchone()[0]
         
-        stmt = &quot;INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)&quot;
+        stmt = "INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)"
         cur.execute(stmt, {'file_id': file_id, 'rule_id': rule_id})
         db.commit()
 
 # Read rules from database
 cur, db = utils.connectToDB()
 
-stmt = &quot;SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1&quot;
+stmt = "SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1"
 cur.execute(stmt)
 storedRules = cur.fetchall()
 
 # Join them
-rulesText = &quot;&quot;
+rulesText = ""
 for rule in storedRules:
     rulesText += rule[0] + '\n'
 
@@ -133,12 +137,12 @@ for rule in storedRules:
 rules = yara.compile(source=rulesText)
 
 
-if len(sys.argv) &gt; 1:
+if len(sys.argv) > 1:
     scanFile(int(sys.argv[1]))
 
 # RabbitMQ callback
 def callback(ch, method, properties, body):
-    print &quot; [x] Received %r&quot; % (body,)
+    print " [x] Received %r" % (body,)
     scanFile(int(body))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
@@ -152,12 +156,14 @@ channel.basic_consume(callback,
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 channel.start_consuming()
-[/sourcecode]
+{% endhighlight %}
 
 <h3>MD5 hash the file</h3>
 One of thing I want our <tt>yarascanner.py</tt> to do is MD5 hash the file.  Seems like a good idea to do it here instead of web server where we don't want to block.  You could make another service for this, with another queue, if you wanted, but I don't want to clutter up this lesson too much.
 
-[sourcecode lang="python" gutter="false" highlight="9,27,28,29,30,31,32,34,35,36,37"]
+(highlight="9,27,28,29,30,31,32,34,35,36,37")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
 # file: yarascanner.py
 
@@ -169,18 +175,18 @@ import pika
 import md5
 
 def scanFile(file_id):
-    print &quot;Scanning file %d&quot; % file_id
+    print ";Scanning file %d"; % file_id
     filename = '%s' % file_id
     filepath = path.join('uploads', filename)
     matches = rules.match(filepath)
     print matches
 
     for match in matches:
-        stmt = &quot;SELECT id FROM rules WHERE name = %(name)s AND enabled=1&quot;
+        stmt = ";SELECT id FROM rules WHERE name = %(name)s AND enabled=1";
         cur.execute(stmt, {'name': match})
         rule_id = cur.fetchone()[0]
         
-        stmt = &quot;INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)&quot;
+        stmt = ";INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)";
         cur.execute(stmt, {'file_id': file_id, 'rule_id': rule_id})
         db.commit()
 
@@ -192,7 +198,7 @@ def scanFile(file_id):
     filehash = m.hexdigest()
 
     # Add the hash to the DB
-    stmt = &quot;UPDATE files SET md5 = %(md5)s WHERE id = %(id)s&quot;
+    stmt = ";UPDATE files SET md5 = %(md5)s WHERE id = %(id)s";
     cur.execute(stmt, {'md5': filehash, 'id': file_id})
     db.commit()
 
@@ -201,12 +207,12 @@ def scanFile(file_id):
 # Read rules from database
 cur, db = utils.connectToDB()
 
-stmt = &quot;SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1&quot;
+stmt = ";SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1";
 cur.execute(stmt)
 storedRules = cur.fetchall()
 
 # Join them
-rulesText = &quot;&quot;
+rulesText = ";";
 for rule in storedRules:
     rulesText += rule[0] + '\n'
 
@@ -214,12 +220,12 @@ for rule in storedRules:
 rules = yara.compile(source=rulesText)
 
 
-if len(sys.argv) &gt; 1:
+if len(sys.argv) > 1:
     scanFile(int(sys.argv[1]))
 
 # RabbitMQ callback
 def callback(ch, method, properties, body):
-    print &quot; [x] Received %r&quot; % (body,)
+    print "; [x] Received %r"; % (body,)
     scanFile(int(body))
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
@@ -233,12 +239,14 @@ channel.basic_consume(callback,
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 channel.start_consuming()
-[/sourcecode]
+{% endhighlight %}
 
 <h3>Getting results</h3>
 At this point, a user can upload a file and it will get scanned and hashed, but they won't be able to see any of the results, so let's work on our web server a little to give some feedback.  We'll just create some handlers that can show them the database data as json output.
 
-[sourcecode lang="python" gutter="false" highlight="10,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,48,49,50,51,52,53,54,55,85,86,87"]
+(highlight="10,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,48,49,50,51,52,53,54,55,85,86,87")
+
+{% highlight python linenos=table %}
 #!/usr/bin/python
 # file: webserver.py
  
@@ -252,12 +260,12 @@ from datetime import datetime
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render(&quot;static/index.htm&quot;)
+        self.render("static/index.htm")
 
 
 class GetFilesHandler(tornado.web.RequestHandler):
     def get(self):
-        stmt = &quot;SELECT id, submission_date, filename, size, md5 from files ORDER BY id DESC LIMIT 10&quot;
+        stmt = "SELECT id, submission_date, filename, size, md5 from files ORDER BY id DESC LIMIT 10"
         cur.execute(stmt)
         files = cur.fetchall()
         output = []
@@ -275,7 +283,7 @@ class GetFilesHandler(tornado.web.RequestHandler):
 
 class GetMatchesHandler(tornado.web.RequestHandler):
     def get(self, file_id):
-        stmt = &quot;SELECT rule_id, description from matches m join rules r on m.rule_id = r.id where m.file_id = %(file_id)s&quot;
+        stmt = "SELECT rule_id, description from matches m join rules r on m.rule_id = r.id where m.file_id = %(file_id)s"
         cur.execute(stmt, {'file_id': file_id})
         matches = cur.fetchall()
         output = []
@@ -291,7 +299,7 @@ class GetMatchesHandler(tornado.web.RequestHandler):
 
 class GetRuleHandler(tornado.web.RequestHandler):
     def get(self, rule_id):
-        stmt = &quot;SELECT text from rules_text WHERE id = %(id)s&quot;
+        stmt = "SELECT text from rules_text WHERE id = %(id)s"
         cur.execute(stmt, {'id': rule_id})
         rule = cur.fetchone()[0]
         self.write(rule)
@@ -305,12 +313,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file_contents = self.request.files['file'][0].body
         file_size = len(file_contents)
 
-        stmt = &quot;INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)&quot;
+        stmt = "INSERT INTO files (filename, size) VALUES (%(filename)s, %(filesize)s)"
         cur.execute(stmt, {'filename': file_name, 'filesize': file_size})
         file_id = cur.lastrowid
         db.commit()
 
-        with open(&quot;uploads/%s&quot; % file_id, &quot;wb&quot;) as f:
+        with open("uploads/%s" % file_id, "wb") as f:
             f.write(file_contents)
         self.finish()
 
@@ -328,18 +336,18 @@ class UploadHandler(tornado.web.RequestHandler):
 cur, db = utils.connectToDB()
  
 application = tornado.web.Application([
-    (r&quot;/file-upload&quot;, UploadHandler),
-    (r&quot;/getFiles&quot;, GetFilesHandler),
-    (r&quot;/getMatches/([0-9]+)&quot;, GetMatchesHandler),
-    (r&quot;/getRule/([0-9]+)&quot;, GetRuleHandler),
-    (r&quot;/&quot;, MainHandler),
+    (r"/file-upload", UploadHandler),
+    (r"/getFiles", GetFilesHandler),
+    (r"/getMatches/([0-9]+)", GetMatchesHandler),
+    (r"/getRule/([0-9]+)", GetRuleHandler),
+    (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
  
-if __name__ == &quot;__main__&quot;:
+if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
-[/sourcecode]
+{% endhighlight %}
 
 <h3>Conclusion</h3>
 Now our user can upload a file and by typing in specific URL's they can see the results, but it's a really sloppy UI.  Next, we'll go over how to make all this data visible to the user.  Also, we need to do some final clean-up so we don't have to manually start these services.

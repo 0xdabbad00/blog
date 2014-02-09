@@ -19,16 +19,16 @@ Given the post a while back on <a href="https://madiba.encs.concordia.ca/~x_deca
 
 <h3>Compiler output</h3>
 I decided to compile the same code with different compilers to see what the differences would be.  I've made those binaries available at: 
-<b><a href='http://0xdabbad00.com/wp-content/uploads/2014/01/compilations_with_different_compilers.zip'>compilations_with_different_compilers.zip</a></b> (2.82MB)
+<b><a href='http://0xdabbad00.com/wp-content/uploads/2014/01/compilations_with_different_compilers.zip'>compilations\_with\_different\_compilers.zip</a></b> (2.82MB)
 
 The included README.txt explains much of what was done.  I compiled very simple binaries as my primary interest was on what the PE headers are that are generated.  The projects used the following source codes:
-[sourcecode lang="c" gutter="false"]
+{% highlight c %}
 int main(int argc, char** argv) {
   return 42;
 }
-[/sourcecode]
-
-[sourcecode lang="c" gutter="false"]
+{% endhighlight %}
+<p>
+{% highlight c %}
 int factorial(int a) {
   if (a == 1) return a;
   return a * factorial(a - 1);
@@ -37,7 +37,7 @@ int factorial(int a) {
 int main(int argc, char** argv) {
   return factorial(argc);
 }
-[/sourcecode]
+{% endhighlight %}
 
 I compiled debug and release builds where possible with the following compilers using all defaults settings:
 <ol>

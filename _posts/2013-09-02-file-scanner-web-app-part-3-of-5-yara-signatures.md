@@ -17,7 +17,7 @@ So far in this training series, we've created a web app in a VM that is capable 
 
 <h3>Install YARA</h3>
 First, on the guest, we need to get the development tools and some required libraries, then we'll download and build YARA.
-<pre>
+{% highlight text %}
 sudo apt-get install build-essential python-dev libpcre3 libpcre3-dev unzip
 cd /tmp
 wget https://yara-project.googlecode.com/files/yara-1.7.tar.gz
@@ -36,21 +36,22 @@ sudo python setup.py install
 cd ..
 rm -rf yara-1.7*
 rm -rf yara-python-1.7*
-</pre>
+{% endhighlight %}
 
 As root, we need to do the following for the YARA python library to work:
-<pre>
+{% highlight text %}
 sudo su -
 echo "/usr/local/lib" >> /etc/ld.so.conf
 ldconfig
 exit
-</pre>
+{% endhighlight %}
 
 Now run <tt>python</tt> and try <tt>import yara</tt>.  It should not show any errors.
 
 <h3>Test out YARA</h3>
 Let's create the following rule file (<tt>yara_rules.txt</tt>):
-<pre>
+
+{% highlight text %}
 rule IsPE
 {
 	meta:                                        
@@ -82,23 +83,24 @@ rule has_no_ASLR
 		IsPE and
 		uint16(uint32(0x3C)+0x5E) & 0x0040 == 0
 }
-</pre>
+{% endhighlight %}
+
 If you're not familiar with the PE file structure, check out my projects <a href="http://icebuddha.com/index.htm?test=1">IceBuddha</a> and <a href="http://icebuddha.com/slopfinder.htm">SlopFinder</a>.
 
 Now let's get some Windows executables and try it out.
-<pre>
+{% highlight text %}
 wget http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe
 wget http://download.sysinternals.com/files/Autoruns.zip
 unzip Autoruns.zip
 yara yara_rules.txt putty.exe # Should show all 3 rules
 yara yara_rules.txt autoruns.exe # Should show only IsPE because it has DEP and ASLR
-</pre>
+{% endhighlight %}
 
 <h3>Create MySQL tables</h3>
 Keeping track of rules is not an important part of this tutorial unfortunately, so I'm going to be lazy here.  Feel free to extend this project by adding proper abilities to edit rules.
 
 Connect the mysql client with <tt>mysql -u root -p scanner</tt> and enter the password, then create tables as follows:
-<pre>
+{% highlight text %}
 create table rules (
   id INT NOT NULL AUTO_INCREMENT,
   submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -119,24 +121,25 @@ create table matches (
   rule_id INT NOT NULL,
   PRIMARY KEY(file_id, rule_id)
 );
-</pre>
+{% endhighlight %}
+
  The <tt>rules</tt> table will keep track of the names of our rules and description field, with the rules themselves being stored in <tt>rules_text</tt>.  The matches table will allow us to correlate rules that matched to the files they matched against.
 
 <h3>Add rules</h3>
 Like I said, this is really sloppy code.  I'm just going to disable any previous rules and add my current set of rules, and I'm going to do some poor man's parsing to extract out the rules and metadata, meaning don't create rules that contain words like 'rules' or 'description' or this will break.
 
 First, I create a <tt>utils.py</tt> file which we'll use to set up our DB connection so we don't need to store our credentials in every file.
-[sourcecode lang="python" gutter="false"]
+{% highlight python %}
 #!/usr/bin/python
 # file: utils.py
 
 import MySQLdb
 
 def connectToDB():
-	db = MySQLdb.connect(host=&quot;localhost&quot;,
-	                     user=&quot;root&quot;,
-	                      passwd=&quot;mypassword&quot;,
-	                      db=&quot;scanner&quot;)
+	db = MySQLdb.connect(host="localhost",
+	                     user="root",
+	                      passwd="mypassword",
+	                      db="scanner")
 	cur = db.cursor()
 	return cur, db
 [/sourcecode]
@@ -149,12 +152,12 @@ Next, we have <tt>updaterules.py</tt> for adding the rules.
 import utils
 import sys
 
-if len(sys.argv) &lt; 2:
-	print &quot;Usage: %s &lt;rules_file&gt;&quot; % sys.argv[0]
+if len(sys.argv) < 2:
+	print "Usage: %s <rules_file>" % sys.argv[0]
 	sys.exit(0)
 
 rulesFile = sys.argv[1]
-print &quot;Loading rules from %s&quot; % rulesFile
+print "Loading rules from %s" % rulesFile
 
 # Read the rules file
 with open(rulesFile) as f:
@@ -171,48 +174,48 @@ for line in rulesData.split('\n'):
 			rule = {'name': '', 'description': '', 'text': ''}
 		rule['name'] = line.replace('rule', '').strip()
 	if line.strip().startswith('description'):
-		rule['description'] = line.replace('description =', '').replace('\&quot;', '').strip()
+		rule['description'] = line.replace('description =', '').replace('\"', '').strip()
 	rule['text'] += line + '\n'
 rules.append(rule)
 
 cur, db = utils.connectToDB()
 
 # Disable all previous rules
-stmt = &quot;UPDATE rules set enabled = 0&quot;
+stmt = "UPDATE rules set enabled = 0"
 cur.execute(stmt)
 db.commit()
 
 # Add our new rules
 for rule in rules:
-	stmt = &quot;INSERT INTO rules (name, description) VALUES (%(name)s, %(description)s)&quot;
+	stmt = "INSERT INTO rules (name, description) VALUES (%(name)s, %(description)s)"
 	cur.execute(stmt, {'name': rule['name'], 'description': rule['description']})
 	rule_id = cur.lastrowid
 	db.commit()
 	
-	stmt = &quot;INSERT INTO rules_text (id, text) VALUES (%(id)s, %(text)s)&quot;
+	stmt = "INSERT INTO rules_text (id, text) VALUES (%(id)s, %(text)s)"
 	cur.execute(stmt, {'id': rule_id, 'text': rule['text']})
 	db.commit()
 
-	print &quot;Added rule %s&quot; % rule['name']
+	print "Added rule %s" % rule['name']
 
 db.close()
-print &quot;Complete&quot;
-[/sourcecode]
+print "Complete"
+{% endhighlight %}
 
 As sloppy as this is, we can now simply run the following to add our rules:
-<pre>
+{% highlight text %}
 /var/apps/scanner$ python updaterules.py yara_rules.txt 
 Loading rules from yara_rules.txt
 Added rule IsPE
 Added rule has_no_DEP
 Added rule has_no_ASLR
 Complete
-</pre>
+{% endhighlight %}
 
 <h3>Scanning files with YARA through Python</h3>
 Now we'll create a python script that can take a <tt>file_id</tt> as an argument.  It will scan the file in the <tt>uploads</tt> directory using the rules stored in the database and then record in the database any matches it finds in the <tt>matches</tt> table.
 
-[sourcecode lang="python" gutter="false"]
+{% highlight python %}
 #!/usr/bin/python
 # file: yarascanner.py
 
@@ -222,41 +225,41 @@ import sys
 from os import path
 
 def scanFile(file_id):
-    print &quot;Scanning file %d&quot; % file_id
+    print "Scanning file %d" % file_id
     filename = '%s' % file_id
     matches = rules.match(path.join('uploads', filename))
     print matches
 
     for match in matches:
-        stmt = &quot;SELECT id FROM rules WHERE name = %(name)s AND enabled=1&quot;
+        stmt = "SELECT id FROM rules WHERE name = %(name)s AND enabled=1"
         cur.execute(stmt, {'name': match})
         rule_id = cur.fetchone()[0]
         
-        stmt = &quot;INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)&quot;
+        stmt = "INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)"
         cur.execute(stmt, {'file_id': file_id, 'rule_id': rule_id})
         db.commit()
 
 
 cur, db = utils.connectToDB()
 
-stmt = &quot;SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1&quot;
+stmt = "SELECT text FROM rules_text rt JOIN rules r ON rt.id = r.id WHERE r.enabled=1"
 cur.execute(stmt)
 storedRules = cur.fetchall()
 
 # Join them
-rulesText = &quot;&quot;
+rulesText = ""
 for rule in storedRules:
     rulesText += rule[0] + '\n'
 
 rules = yara.compile(source=rulesText)
 
 
-if len(sys.argv) &gt; 1:
+if len(sys.argv) > 1:
     scanFile(int(sys.argv[1]))
-[/sourcecode]
+{% endhighlight %}
 
 Running this over our two files (using something like <tt>python yarascanner.py 4</tt>) should result in something like the following in the database:
-<pre>
+{% highlight text %}
 mysql> select * from matches;
 +---------+---------+
 | file_id | rule_id |
@@ -267,7 +270,7 @@ mysql> select * from matches;
 |       5 |       6 |
 +---------+---------+
 4 rows in set (0.00 sec)
-</pre>
+{% endhighlight %}
 
 We can now insert rules into our database (using <tt>updaterules.py</tt>) and scan files using those rules (using <tt>yarascanner.py</tt>) which will result in our database containing the matches found.
 

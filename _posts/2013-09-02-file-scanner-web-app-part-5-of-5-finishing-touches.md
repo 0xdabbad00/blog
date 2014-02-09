@@ -62,31 +62,31 @@ mv dropzone.js js/.
 </pre>
 
 Now we set our <tt>index.htm</tt> to look like the following so it uses these changes and also uses bootstrap:
-[sourcecode lang="html" gutter="false"]
-&lt;html&gt;
-&lt;head&gt;
-    &lt;link href=&quot;css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; media=&quot;screen&quot;&gt;
-    &lt;link href=&quot;css/scanner.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;/head&gt;
+{% highlight html %}
+<html>
+<head>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/scanner.css" rel="stylesheet">
+</head>
 
-&lt;body&gt;
-    &lt;div class=&quot;container&quot;&gt;
-    &lt;h1&gt;File Scanner&lt;/h1&gt;
+<body>
+    <div class="container">
+    <h1>File Scanner</h1>
 
-    &lt;form action=&quot;/file-upload&quot;
-          class=&quot;dropzone&quot;
-          id=&quot;mydropzone&quot;&gt;&lt;/form&gt;
-    &lt;/div&gt;
-&lt;/body&gt;
+    <form action="/file-upload"
+          class="dropzone"
+          id="mydropzone"></form>
+    </div>
+</body>
 
-&lt;!-- jQuery (necessary for Bootstrap's JavaScript plugins) --&gt;
-&lt;script src=&quot;js/jquery.min.js&quot;&gt;&lt;/script&gt;
-&lt;!-- Include all compiled plugins (below), or include individual files as needed --&gt;
-&lt;script src=&quot;js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="js/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
 
-&lt;script src=&quot;js/dropzone.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;js/scanner.js&quot;&gt;&lt;/script&gt;
-[/sourcecode]
+<script src="js/dropzone.js"></script>
+<script src="js/scanner.js"></script>
+{% endhighlight %}
 
 Easy.  Now we're using bootstrap.  The only difference you should see is that the font has changed and you have a margin around the content.
 
@@ -104,54 +104,61 @@ mv DataTables-1.9.4/media/images .
 Integrating DatatablesJS into our <tt>index.htm</tt> is a little painful the first time you do it.  What happens is we create an initial mock-up of our table in the HTML, then in the <tt>scanner.js</tt> we tell it to pull in our data via ajax and redo our table using that.  I then added in code so I can click on rows and show the rule matches at the bottom (again via more javascript).  Then if you click on a rule that matched it takes you to the actual YARA signature code that is stored in the database.
 
 First the <tt>index.htm</tt> file.
-[sourcecode lang="html" gutter="false" highlight="5,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,42"]
-&lt;html&gt;
-&lt;head&gt;
-    &lt;link href=&quot;css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; media=&quot;screen&quot;&gt;
-    &lt;link href=&quot;css/scanner.css&quot; rel=&quot;stylesheet&quot;&gt;
-    &lt;link href=&quot;css/jquery.dataTables.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;/head&gt;
 
-&lt;body&gt;
-    &lt;div class=&quot;container&quot;&gt;
-    &lt;h1&gt;File Scanner&lt;/h1&gt;
+(Highlight lines:5,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,42)
 
-    &lt;form action=&quot;/file-upload&quot;
-          class=&quot;dropzone&quot;
-          id=&quot;mydropzone&quot;&gt;&lt;/form&gt;
+{% highlight html linenos=table %}
+<html>
+<head>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/scanner.css" rel="stylesheet">
+    <link href="css/jquery.dataTables.css" rel="stylesheet">
+</head>
 
-    &lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; class=&quot;display&quot; id=&quot;datatable&quot;&gt;
-        &lt;thead&gt;
-        &lt;tr&gt;
-            &lt;th&gt;ID&lt;/th&gt;
-            &lt;th&gt;Submission Date&lt;/th&gt;
-            &lt;th&gt;Filename&lt;/th&gt;
-            &lt;th&gt;Filesize&lt;/th&gt;
-            &lt;th&gt;MD5&lt;/th&gt;
-        &lt;/tr&gt;
-        &lt;/thead&gt;
-        &lt;tbody&gt;&lt;/tbody&gt;
-    &lt;/table&gt;
+<body>
+    <div class="container">
+    <h1>File Scanner</h1>
 
-    &lt;hr&gt;
-    &lt;h3&gt;Match data&lt;/h3&gt;
-    &lt;div id=&quot;matchData&quot;&gt;Click an element to display it's matches&lt;/div&gt;
+    <form action="/file-upload"
+          class="dropzone"
+          id="mydropzone"></form>
 
-    &lt;/div&gt;
-&lt;/body&gt;
+    <table cellpadding="0" cellspacing="0" border="0" class="display" id="datatable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Submission Date</th>
+            <th>Filename</th>
+            <th>Filesize</th>
+            <th>MD5</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-&lt;!-- jQuery (necessary for Bootstrap's JavaScript plugins) --&gt;
-&lt;script src=&quot;js/jquery.min.js&quot;&gt;&lt;/script&gt;
-&lt;!-- Include all compiled plugins (below), or include individual files as needed --&gt;
-&lt;script src=&quot;js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+    <hr>
+    <h3>Match data</h3>
+    <div id="matchData">Click an element to display it's matches</div>
 
-&lt;script src=&quot;js/dropzone.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;js/jquery.dataTables.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;js/scanner.js&quot;&gt;&lt;/script&gt;
-[/sourcecode]
+    </div>
+</body>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="js/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+
+<script src="js/dropzone.js"></script>
+<script src="js/jquery.dataTables.min.js"></script>
+<script src="js/scanner.js"></script>
+
+{% endhighlight %}
 
 Now a small change to our <tt>scanner.css</tt>.
-[sourcecode lang="css" gutter="false" highlight="8"]
+
+(Highlight lines: 8)
+
+{% highlight css linenos=table %}
 .dropzone {
     border-style:dotted; 
     border-width:2px;
@@ -160,33 +167,36 @@ Now a small change to our <tt>scanner.css</tt>.
 }
 
 tr.row_selected td {background-color:#ffff00}
-[/sourcecode]
+{% endhighlight %}
 
 Our <tt>scanner.js</tt> requires a large addition.
-[sourcecode lang="javascript" gutter="false" highlight="15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44"]
+
+(Highlight lines: 15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44)
+
+{% highlight javascript linenos=table %}
 Dropzone.options.mydropzone = {
-    previewTemplate : '&lt;div class=&quot;preview file-preview&quot;&gt;\
-    &lt;div class=&quot;dz-details&quot;&gt;\
-        &lt;b class=&quot;dz-filename&quot;&gt;&lt;span data-dz-name&gt;&lt;/span&gt;&lt;/b&gt;\
-        &lt;b class=&quot;dz-size&quot; data-dz-size&gt;&lt;/b&gt;\
-    &lt;/div&gt;\
-    &lt;div class=&quot;dz-progress&quot;&gt;&lt;span class=&quot;dz-upload&quot; data-dz-uploadprogress&gt;&lt;/span&gt;&lt;/div&gt;\
-    &lt;div class=&quot;dz-error-message&quot;&gt;&lt;span data-dz-errormessage&gt;&lt;/span&gt;&lt;/div&gt;\
-    &lt;/div&gt;',
+    previewTemplate : '<div class="preview file-preview">\
+    <div class="dz-details">\
+        <b class="dz-filename"><span data-dz-name></span></b>\
+        <b class="dz-size" data-dz-size></b>\
+    </div>\
+    <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>\
+    <div class="dz-error-message"><span data-dz-errormessage></span></div>\
+    </div>',
     init: function() {
-        this.on(&quot;complete&quot;, function(file) { console.log(&quot;Upload complete&quot;); });
+        this.on("complete", function(file) { console.log("Upload complete"); });
     }
 };
 
 
 $(document).ready(function() {
     oTable = $('#datatable').dataTable( {
-        &quot;bProcessing&quot;: true,
-        &quot;sAjaxDataProp&quot;: '',
-        &quot;sAjaxSource&quot;: '/getFiles',
+        "bProcessing": true,
+        "sAjaxDataProp": '',
+        "sAjaxSource": '/getFiles',
     } );
 
-    $(&quot;#datatable tbody&quot;).click(function(event){
+    $("#datatable tbody").click(function(event){
             $(oTable.fnSettings().aoData).each(function (){
                 $(this.nTr).removeClass('row_selected');
             });
@@ -194,22 +204,22 @@ $(document).ready(function() {
 
             var id = oTable.fnGetData(event.target.parentNode)[0];
             $.ajax({
-              url: &quot;/getMatches/&quot;+id,
+              url: "/getMatches/"+id,
             }).done(function(matches) {
-                content = &quot;&quot;;
+                content = "";
                 matches = JSON.parse(matches);
                 for (var i in matches) {
                   match = matches[i];
-                  content += &quot;Match: &lt;a href='/getRule/&quot;+match['rule_id']+&quot;'&gt;&quot;+match['description']+&quot;&lt;/a&gt;&lt;br&gt;&quot;
+                  content += "Match: <a href='/getRule/"+match['rule_id']+"'>"+match['description']+"</a><br>"
                 }
-                if (content == &quot;&quot;) {
-                    content = &quot;No matches found&quot;;
+                if (content == "") {
+                    content = "No matches found";
                 }
-                $(&quot;#matchData&quot;).html(content);
+                $("#matchData").html(content);
             });
     });
 } );
-[/sourcecode]
+{% endhighlight %}
 
 At this point if you visit the web app in the browser, drop some files and click on the rows, you should be able to see something like the following:
 <a href="http://0xdabbad00.com/wp-content/uploads/2013/09/Screen-Shot-2013-09-02-at-3.30.33-PM.png"><img src="http://0xdabbad00.com/wp-content/uploads/2013/09/Screen-Shot-2013-09-02-at-3.30.33-PM-300x152.png" alt="" title="Finished app" width="300" height="152" class="aligncenter size-medium wp-image-1190" /></a>

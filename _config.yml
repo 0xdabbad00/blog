@@ -4,3 +4,4 @@ pygments: true
 paginate: 1
 safe: true
 lsi: false
+permalink: pretty

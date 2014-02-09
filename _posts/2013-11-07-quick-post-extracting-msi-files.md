@@ -15,7 +15,7 @@ This is just a quick post to show how to extract MSI files.  Nothing exciting, b
 Microsoft <a href="http://blogs.technet.com/b/srd/archive/2013/11/05/cve-2013-3906-a-graphics-vulnerability-exploited-through-word-documents.aspx">announced</a> this week CVE-2013-3906, a graphics vulnerability in Office and Lync, which is being actively exploited.  In an incident like this, Microsoft will create a <a href="https://support.microsoft.com/kb/2896666">Fixit</a>, which is a short-term solution to disable whatever functionality the exploit is abusing, often by setting a registry value.  It is interesting that Microsoft has built-in many kill switches into their products, which allow functionality to be disabled by setting certain registry values.
 
 Microsoft says what this Fixit does.  It simply sets:
-<code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Gdiplus\DisableTIFFCodec = 1</code>
+<code>HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Gdiplus\DisableTIFFCodec = 1</code>
 
 This post will just show how to confirm that.
 
