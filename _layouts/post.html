@@ -1,0 +1,32 @@
+---
+layout: default
+---
+<div class="content">
+    <h2>{{ page.title }}</h2>
+    <p class="meta">{{ page.date | date_to_string }}</p>
+
+    <div class="post">
+    {{ content }}
+    </div>
+
+    <hr>
+
+    <!-- Pagination links -->
+    <div class="pagination">
+    {% if page.next %}
+    <span class="page-nav-item">
+        <a rel="next" href="{{ page.next.url }}" title="View {{ page.next.title }}">&larr; {{ page.next.title }} </a>
+    </span>
+    {% endif %}
+
+    {% if page.previous %}
+    <span class="page-nav-item">
+        | <a rel="prev" href="{{ page.previous.url }}" title="View {{ page.previous.title }}">{{ page.previous.title }} &rarr;</a>
+    </span>
+    {% endif %}
+    </div>
+
+</div>
+
+
+

@@ -1,0 +1,35 @@
+---
+layout: default
+title: Projects
+---
+<div class="content">
+
+<h1>IceBuddha</h1>
+<p><a href="http://icebuddha.com">IceBuddha</a> was a project to see how far I could take the capabilities of a web front-end as a UI.  It is a hex-viewer and generic binary file parser, that runs entirely browser-side.  It is actually hosted on github pages entirely.  When you drag and drop a file to it, it loads it locally into memory (it does not upload the file anywhere).
+
+<p>It parses files by reading python code that you can edit in your browser.  That python code is then run through <a href="http://www.skulpt.org/">skulpt</a> in order to convert it to javascript (again, all in your browser).  Using this python/javascript file description, it parses the binary file and presents a unique UI to view this data from. This includes functionality like color coding the different structures.  The UI also features a unique infinite-scroll view that only loads the relevant hex data for the porition of the file in the viewing area, but it properly maintains the scroll bar positions so they don't lurch and jump around like most infinite scrolls do (ex. twitter).
+
+<p><a href="https://github.com/0xdabbad00/icebuddha">Source code</a>
+
+
+<h1>SlopFinder</h1>
+<a href="http://icebuddha.com/slopfinder.htm">SlopFinder</a> is sort of a sub-project of IceBuddha.  You can drag and drop <p>entire folders into SlopFinder and it will parse any executable files (from in the browser) to determine if they were compiled with DEP and ASLR.  See <a href="http://0xdabbad00.com/2012/12/05/finding-slop-common-windows-apps-still-without-dep-and-aslr/">this post</a> for a description of how i used it to check some common Windows apps.
+
+
+<h1>OpenHIPS</h1>
+OpenHIPS (Open-source Host Intrusion Prevention System) was mostly just an excuse to play with <a href="http://plusvic.github.io/yara/">YARA</a> back when it first came out, to play with C# code, and make a complete Windows application.  The concept is a DLL will be loaded into different processes on the system, and periodically this DLL will scan the memory of these processes using YARA signatures to look for known shellcode.  This is not a super smart idea as it will have performance issues and isn't a great protection idea anyway.  But anyway, the project is cool because it's a complete Windows app:
+<ul>
+	<li>The project should run on all versions of Windows from 2000 to Windows 7, both 32-bit and 64-bit.
+	<li>C# code for a a simple GUI, that is accessible from a Windows tray icon, and a Windows service.
+	<li>At the time, it was the only YARA compilation for Windows as a library and also as 64-bit code.
+	<li>A related <a href="http://0xdabbad00.com/2011/04/23/creating-a-yara-signature-for-shellcode/">blog post</a> I wrote for this project was the only resource for showing how to write YARA scripts for shell-code and one of the few resources anywhere at the time for how to use YARA.
+	<li>The only example of WiX code at the time for showing an actual complete installer that does anything beyond just writing files to a specific directory.
+</ul>
+
+<p>See <a href="http://0xdabbad00.com/2011/04/03/openhips-v0-1-0-0-released-but-not-useful/">this post</a> for more info.
+
+<p><a href="https://github.com/0xdabbad00/OpenHIPS">Source code</a>
+
+
+
+</div>

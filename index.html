@@ -1,0 +1,26 @@
+---
+layout: default
+---
+
+<div class="content"> 
+<div class="blog-index">
+
+{% assign post = site.posts.first %}
+{% assign content = post.content %}
+{% include post_detail.html %}
+</div>
+
+
+
+<hr>
+
+<!-- Pagination links -->
+<div class="pagination">
+{% if post.previous %}
+<span class="page-nav-item">
+    <a rel="prev" href="{{ post.previous.url }}" title="View {{ post.previous.title }}">{{ post.previous.title }} &rarr;</a>
+</span>
+{% endif %}
+</div>
+
+</div>
