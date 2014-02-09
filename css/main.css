@@ -18,12 +18,26 @@ body {
 }
 
 h1 {
-   font-size: 120%; 
+  font-size: 130%;
 }
 
-h2, h3, h4, h5, h6 { 
-  font-size: 110%; 
+h2 {
+  font-size: 120%;
+}
+
+h3 {
+  font-size: 110%;
+}
+
+
+h2, h3 { 
   margin-top: 1em;
+  margin-left: -1em;
+}
+
+h4, h5, h6 {
+  font-size: 90%;
+  margin-left: -0.5em;
 }
 
 p { margin: 1em 0; }
@@ -113,6 +127,11 @@ div.header > * {
 
 .title {
   display: inline-block;
+  font-size: 110%;
+}
+
+h1 .title {
+  font-size: 110%;
 }
 
 .title a {

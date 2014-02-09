@@ -6,9 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1358762841'
-  _edit_last: '2'
 ---
 This post is mostly just organizing all the info that's been posted lately about Java 7 problems.
 
@@ -28,7 +25,7 @@ First, let's understand the problem.  To really dig into the guts of it, here ar
 </ul>
 
 <h3>Current solutions</h3>
-Let's explore the options to handle this vulnerability.  The nuclear option is to uninstall Java completely (check the directories <tt>C:\Program Files\Java\</tt> or <tt>C:\Program Files (x86)\Java\</tt>).  The basic problem though is that Java runs in the browser and this is where the trouble happens, so if you still need Java, but not in the browser, just disable Java in the browser.  If you have a Java app that runs locally on your system, it's likely not going to be affected by this vulnerability.  You're only vulnerable if you are executing arbitrary Java files, which is what the browser does.  Even if you don't go to sketchy sites, those sites could have been hacked, or they could have advertisements which bad guys can "advertise" things on which execute Java.
+Let's explore the options to handle this vulnerability.  The nuclear option is to uninstall Java completely (check the directories `C:\Program Files\Java\` or `C:\Program Files (x86)\Java\`).  The basic problem though is that Java runs in the browser and this is where the trouble happens, so if you still need Java, but not in the browser, just disable Java in the browser.  If you have a Java app that runs locally on your system, it's likely not going to be affected by this vulnerability.  You're only vulnerable if you are executing arbitrary Java files, which is what the browser does.  Even if you don't go to sketchy sites, those sites could have been hacked, or they could have advertisements which bad guys can "advertise" things on which execute Java.
 
 <h4>Disable Java in the browser</h4>
 If you use IE, you can't really disable Java from the browser, so if possible use Mozilla or Chrome.  If you use Mozilla or Chrome, those browser now force you to "Click to play" the java code, effectively stopping the exploit unless you click on it.  Interestingly, Apple took the approach of <a href="http://www.h-online.com/security/news/item/Java-plugins-unplugged-by-Mozilla-and-Apple-1782628.html">black-listing Java entirely</a>.  <a href="https://krebsonsecurity.com/how-to-unplug-java-from-the-browser/">Krebs on Security</a> discusses how to disable Java on various browsers, in case the "Click to play" solution is not enough for you. To check if your browser is still running Java, go to <a href="https://www.java.com/en/download/testjava.jsp">https://www.java.com/en/download/testjava.jsp</a>.

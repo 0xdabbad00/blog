@@ -6,10 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1364827440'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 This post summarizes some core concepts in getting <a href="http://www.skulpt.org/">skulpt</a> (Python in the browser) to work.
 
@@ -51,32 +47,33 @@ There is a great example on using skulpt on the homepage of <a href="http://www.
 <ol>
 <li>Download <a href="https://github.com/bnmnetp/skulpt/raw/master/dist/skulpt.js">skulpt.js</a> (242KB)
 <li>Add the following to a new file called test.html
-[sourcecode lang="html" gutter="false"]
-&lt;html&gt; 
-&lt;head&gt;
-&lt;script src=&quot;skulpt.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt; 
-&lt;/head&gt; 
+{% highlight html %}
+<html> 
+<head>
+<script src="skulpt.js" type="text/javascript"></script> 
+</head> 
 
-&lt;body&gt; 
-&lt;textarea id=&quot;pythonCode&quot;&gt;
+<body> 
+<textarea id="pythonCode">
 for i in range(10):
-	print i
-&lt;/textarea&gt;&lt;br /&gt; 
-&lt;pre id=&quot;output&quot;&gt;&lt;/pre&gt; 
+    print i
+</textarea><br /> 
+<pre id="output"></pre> 
 
-&lt;script type=&quot;text/javascript&quot;&gt; 
+<script type="text/javascript"> 
 function outf(text) { 
-    var mypre = document.getElementById(&quot;output&quot;); 
+    var mypre = document.getElementById("output"); 
     mypre.innerHTML = mypre.innerHTML + text; 
 } 
 
-var code = document.getElementById(&quot;pythonCode&quot;).value; 
+var code = document.getElementById("pythonCode").value; 
 Sk.configure({output:outf}); 
-eval(Sk.importMainWithBody(&quot;&lt;stdin&gt;&quot;,false,code)); 
-&lt;/script&gt; 
+eval(Sk.importMainWithBody("<stdin>",false,code)); 
+</script> 
 
-&lt;/body&gt; 
-&lt;/html&gt; [/sourcecode]
+</body> 
+</html> 
+{% endhighlight %}
 
 <li>Open test.html in your browser, and it should display the Python code and then the numbers 0 through 9. Hurray!
 </ol>
@@ -84,56 +81,56 @@ The JavaScript at the bottom finds the code we want to run (in the textarea), te
 
 <h3>Loading Python code from files on the server</h3>
 For me, the first thing that bothered me when working with skulpt, is I didn't want to have my Python code in my html or JavaScript files.  I wanted just Python in .py files.  This way all my syntax high-lighting and <a href="http://www.python.org/dev/peps/pep-0008/">PEP8</a> checking would work.  My solution is in my JavaScript code, I use jquery to grab my file:
-[sourcecode lang="javascript" gutter="false"]
-cacheBreaker = &quot;?&quot;+new Date().getTime();
-$.get(&quot;./test.py&quot;+cacheBreaker, function(response) {
-	runSkulpt(response);
+{% highlight javascript %}
+cacheBreaker = "?"+new Date().getTime();
+$.get("./test.py"+cacheBreaker, function(response) {
+    runSkulpt(response);
 });
-[/sourcecode]
+{% endhighlight %}
 
 <h3>Passing data to the Python code</h3>
 To pass in data, I make my Python code a class, and then do things slightly differently.  Here is an example:
 
 Javascript code
-[sourcecode lang="javascript" gutter="false"]
-var module = Sk.importMainWithBody(&quot;&lt;stdin&gt;&quot;, false, code);
+{% highlight javascript %}
+var module = Sk.importMainWithBody("<stdin>", false, code);
 var obj = module.tp$getattr('MyClass');
 var runMethod = obj.tp$getattr('run');
 
 var arrayForSkulpt = new Array();
-for (var i=0; i&lt;5; i++) {
+for (var i=0; i<5; i++) {
   arrayForSkulpt[i] = i;
 }
 
 // Run parse script
 var ret = Sk.misceval.callsim(runMethod, Sk.builtin.list(arrayForSkulpt));
-[/sourcecode]
+{% endhighlight %}
 
 Python code
-[sourcecode lang="python" gutter="false"]
+{% highlight python %}
 class MyClass:
     def run(self, data):
         for i in data:
             print i
-[/sourcecode]
+{% endhighlight %}
 
 <h3>Getting data back from the Python code</h3>
 I had trouble returning anything other than arrays, strings, numbers, and arrays of arrays back from the Python.  So in my Python code I just return some arrays of data from the run method, and then in my JavaScript code, I spent a lot of time with the JavaScript debugger to figure out how to get the data back I wanted.  The trick is that the data you want will be in <tt>ret.v</tt> in that JavaScript code from the last example.  So if you change the Python code to:
-[sourcecode lang="python" gutter="false"]
+{% highlight python %}
 class MyClass:
     def run(self, data):
         sum = 0
         for i in data:
             sum += i
         return sum
-[/sourcecode]
+{% endhighlight %}
 
 Then in your JavaScript you'll have:
-[sourcecode lang="javascript" gutter="false"]
+{% highlight javascript %}
 // Run parse script
 var ret = Sk.misceval.callsim(runMethod, Sk.builtin.list(arrayForSkulpt));
 var sum = ret.v;
-[/sourcecode]
+{% endhighlight %}
 
 
 <h3>Adding modules to skulpt</h3>
@@ -142,48 +139,48 @@ Depending on your needs, you may want to just concatenate files together and run
 <ol>
 <li>Download the Skulpt code: <tt>git clone https://github.com/bnmnetp/skulpt.git</tt>
 <li>Copy your module directory to <tt>./skulpt/src/lib/</tt>.  For example:
-[sourcecode lang="bash" gutter="false"]
+{% highlight bash %}
 cd skulpt
 mkdir ./src/lib/MyModule
-cat &gt;./src/lib/MyModule/__init__.py &lt;&lt;EOL
+cat >./src/lib/MyModule/__init__.py <<EOL
 class MessagePrinter:
     def printMessage(self):
-        print &quot;Hello World&quot;
+        print "Hello World"
 EOL
-[/sourcecode]
+{% endhighlight %}
 <li>Compile skulpt and copy the new files to your server:
-[sourcecode lang="bash" gutter="false"]
+{% highlight bash %}
 ./m dist
 cp dist/* yourWebServer/.
-[/sourcecode]
+{% endhighlight %}
 
 <li>At the top of your HTML file, you'll need to add a reference to the file <tt>builtin.js</tt> after <tt>skulpt.js</tt>, so it looks like:
-[sourcecode lang="html" gutter="false"]
-&lt;html&gt; 
-&lt;head&gt;
-&lt;script src=&quot;skulpt.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt; 
-&lt;script src=&quot;builtin.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt; 
-&lt;/head&gt;
-[/sourcecode]
+{% highlight html %}
+<html> 
+<head>
+<script src="skulpt.js" type="text/javascript"></script> 
+<script src="builtin.js" type="text/javascript"></script> 
+</head>
+{% endhighlight %}
 
 <li>In your JavaScript code, you'll need to add in the function <tt>builtinRead</tt> and add it to your <tt>Sk.configure</tt> call:
-[sourcecode lang="javascript" gutter="false"]
+{% highlight javascript %}
 function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles[&quot;files&quot;][x] === undefined)
-            throw &quot;File not found: '&quot; + x + &quot;'&quot;;
-    return Sk.builtinFiles[&quot;files&quot;][x];
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+            throw "File not found: '" + x + "'";
+    return Sk.builtinFiles["files"][x];
 }
 
 Sk.configure({output:outf, read:builtinRead}); 
-[/sourcecode]
+{% endhighlight %}
 
 <li>Change your Python to use the new module:
-[sourcecode lang="python" gutter="false"]
+{% highlight python %}
 import MyModule
 
 class MyClass:
     def run(self, data):
         mp = MyModule.MessagePrinter()
         mp.printMessage()
-[/sourcecode]
+{% endhighlight %}
 </ol>
