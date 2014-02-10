@@ -6,10 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1354970140'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 <h3>FileReader</h3>
 I have been working sporadically on a project for the past few months to see how far I can take a webapp.  As indicated in my post <a href="http://0xdabbad00.com/2012/03/18/html5-filereader/">HTML5 FileReader</a>, I have been interested in using the HTML5 FileReader functionality to read local files.  Using this feature, I created <a href="http://icebuddha.com">IceBuddha.com</a>.  This project began as a web-based hex-viewer for binary files that can be drag and dropped to the page.  When you initially drop a file, the first 1600 bytes are read, and as you scroll down, more and more of the file is read in.  This allows you to drop 20MB file with no performance impact, but this is going to make other functionality difficult, so I might change this.   For now, thank you <a href="http://imakewebthings.com/jquery-waypoints/">http://imakewebthings.com/jquery-waypoints/</a> for making a lot of the functionality for that possible.
@@ -31,11 +27,11 @@ There are a few generic binary file parsers already.  For Windows, there is an a
 <h3>Template format</h3>
 If you want people to help write templates for your project, you need to make it easy for them.  I assume most binary files have C headers describing parts of their structure.  Example, for PE files (.exe, .dll, and .sys files), you can look in <a href="http://source.winehq.org/source/include/winnt.h">winnt.h</a> for parts of it's structure.
 
-Additionally, I need some logic to describe things like parse IMAGE_OPTIONAL_HEADER in a PE file at the offset given by e_lfanew in the IMAGE_DOS_HEADER.  Originally, I had attempted using a <a href="http://en.wikipedia.org/wiki/Domain-specific_language">DSL</a>, like 010 editor, but no one wants to learn a DSL.  So then I considered trying to use a language and library with more transferable skills by using the format of Wireshark's dissector files which allow a variety of languages (C, Lua, Python), but this would be a big and awkward under-taking to make this usable by JavaScript (would need to leverage a Python interpreter for JavaScript), and the formatting still seemed awkward to me.  I might regret this, but I decided to use JavaScript for the logic of the parsing.
+Additionally, I need some logic to describe things like parse `IMAGE_OPTIONAL_HEADER` in a PE file at the offset given by `e_lfanew` in the `IMAGE_DOS_HEADER`.  Originally, I had attempted using a <a href="http://en.wikipedia.org/wiki/Domain-specific_language">DSL</a>, like 010 editor, but no one wants to learn a DSL.  So then I considered trying to use a language and library with more transferable skills by using the format of Wireshark's dissector files which allow a variety of languages (C, Lua, Python), but this would be a big and awkward under-taking to make this usable by JavaScript (would need to leverage a Python interpreter for JavaScript), and the formatting still seemed awkward to me.  I might regret this, but I decided to use JavaScript for the logic of the parsing.
 
 To tie together the C header formatted data structure representations with the JavaScript logic, I use <a href="http://pegjs.majda.cz/">PEG.js</a> which is a Parser Generator for JavaScript to parse the C header struct's on the data provided.  A template file for a PE file thus looks like this:
 
-[sourcecode language="javascript"]
+{% highlight javascript %}
 typedef struct IMAGE_DOS_HEADER {
 	WORD  e_magic;      /* 00: MZ Header signature */
 	WORD  e_cblp;       /* 02: Bytes on last page of file */
@@ -94,20 +90,20 @@ typedef struct IMAGE_OPTIONAL_HEADER {
 
 
 var imageDosHeader = parseStruct(0, IMAGE_DOS_HEADER);
-var e_lfanew = getStructValue(imageDosHeader, &quot;e_lfanew&quot;);
+var e_lfanew = getStructValue(imageDosHeader, "e_lfanew");
 parseStruct(e_lfanew, IMAGE_OPTIONAL_HEADER);
-[/sourcecode]
+{% endhighlight %}
 
 I want to essentially run an eval on this JavaScript file to parse the data given, and have it leverage a library of functions such as parseStruct() and getStructValue().  However, those structs make this totally broken JavaScript, so what I do is run regex's on this file to convert those structs to strings:
-[sourcecode language="javascript"]
-var IMAGE_DOS_HEADER = &quot;
+{% highlight javascript %}
+var IMAGE_DOS_HEADER = "
 typedef struct IMAGE_DOS_HEADER {
 	WORD  e_magic;      /* 00: MZ Header signature */
 	WORD  e_cblp;       /* 02: Bytes on last page of file */
 	...
 } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
-&quot;;
-[/sourcecode]
+";
+{% endhighlight %}
 
 Next, JavaScript does not allow multi-line strings unless you end each line with a back-slash, but this apparently causes some browser issues, so my hack was simply to use a regex to convert the entire JavaScript file to a single line, and then eval that.  So far this hack has worked brilliantly for me!
 

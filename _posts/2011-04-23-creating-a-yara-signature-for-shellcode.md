@@ -6,28 +6,24 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1303749256'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 In working on <a href="https://www.assembla.com/wiki/show/openhips/">OpenHIPS</a>, I need to generate <a href="http://code.google.com/p/yara-project/">YARA</a> signatures for shellcode to detect the exploits used against browsers and client applications, like Adobe Reader.  The first thing I did was use <a href="http://www.metasploit.com/">metasploit</a> to generate a "malicious" PDF.  Starting up metasploit 3 on Windows, I tried a couple of exploits before I came across one that worked well, as shown:
-[sourcecode language="text"]
-msf &gt; use exploit/windows/fileformat/adobe_geticon
-msf exploit(adobe_geticon) &gt; set PAYLOAD windows/messagebox
-PAYLOAD =&gt; windows/messagebox
-msf exploit(adobe_geticon) &gt; exploit
+{% highlight text %}
+msf < use exploit/windows/fileformat/adobe_geticon
+msf exploit(adobe_geticon) < set PAYLOAD windows/messagebox
+PAYLOAD =< windows/messagebox
+msf exploit(adobe_geticon) < exploit
 
 [*] Creating 'msf.pdf' file...
 [*] Generated output file C:/metasploit/msf3/data/exploits/msf.pdf
 [*] Exploit completed, but no session was created.
-[/sourcecode]
+{% endhighlight %}
 
-This exploit uses a heap spray, so I commented out the code in OpenHIPS to detect large memory usage in my testing.  Next I brought up a Windows XP SP2 VM and installed Adobe 8.1.2 from <a href="http://www.oldapps.com/adobe_reader.php">oldapps.com</a>.  I opened up the <tt>msf.pdf</tt> file with this version of Adobe and after a while (it takes a while to allocate about 700MB for the heap spray), it popped up a little message box.
+This exploit uses a heap spray, so I commented out the code in OpenHIPS to detect large memory usage in my testing.  Next I brought up a Windows XP SP2 VM and installed Adobe 8.1.2 from <a href="http://www.oldapps.com/adobe_reader.php">oldapps.com</a>.  I opened up the `msf.pdf` file with this version of Adobe and after a while (it takes a while to allocate about 700MB for the heap spray), it popped up a little message box.
 
 With the exploited Adobe Reader running, I attached WinDbg to it, and typed in the following in order to find the thread that had spawned the messagebox:
-[sourcecode language="text"]
-&gt; ~* k
+{% highlight text %}
+< ~* k
 0  Id: 100.54c Suspend: 1 Teb: 7ffdf000 Unfrozen
 ChildEBP RetAddr  
 0012d8cc 77d493f5 ntdll!KiFastSystemCallRet
@@ -42,11 +38,11 @@ ChildEBP RetAddr
 WARNING: Frame IP not in any known module. Following frames may be wrong.
 ...
 
-&gt; u 0a11fff2
-[/sourcecode]
+< u 0a11fff2
+{% endhighlight %}
 
-The command <tt>~* k</tt> shows a stack backtrace of all the functions for every thread.  I cut out all the other threads.  Then I looked at the assembly code at address <tt>0x0a11fff2</tt> where the <tt>MessageBoxA</tt> call was made from.  I scrolled back up through the assembly instructions, and luckily I knew what I was looking for, because metasploit is open-source, so I can look at the file <tt>C:\metasploit\msf3\modules\payloads\singles\windows\messagebox.rb</tt> and I found the following assembly inside the ruby code interesting because it is searching through memory for the kernel32.dll file, and then looking for a specific function (MessageBoxA).  This looks like a good signature to me.
-[sourcecode language="text"]
+The command `~* k` shows a stack backtrace of all the functions for every thread.  I cut out all the other threads.  Then I looked at the assembly code at address `0x0a11fff2` where the `MessageBoxA` call was made from.  I scrolled back up through the assembly instructions, and luckily I knew what I was looking for, because metasploit is open-source, so I can look at the file `C:\metasploit\msf3\modules\payloads\singles\windows\messagebox.rb` and I found the following assembly inside the ruby code interesting because it is searching through memory for the kernel32.dll file, and then looking for a specific function (MessageBoxA).  This looks like a good signature to me.
+{% highlight text %}
 ;get kernel32
 	xor ecx,ecx
 	mov esi, [fs:ecx + 0x30]
@@ -132,10 +128,10 @@ find_function_finished:
 	popad 				;restore original registers.
 						;eax will contain function address
 	ret
-[/sourcecode]
+{% endhighlight %}
 
 Correlating this back to the actual memory in the program, I can see the following:
-[sourcecode language="text"]
+{% highlight text %}
 0a11fef5 31c9            xor     ecx,ecx
 0a11fef7 648b7130        mov     esi,dword ptr fs:[ecx+30h]
 0a11fefb 8b760c          mov     esi,dword ptr [esi+0Ch]
@@ -181,30 +177,30 @@ Correlating this back to the actual memory in the program, I can see the followi
 0a11ff5b 8944241c        mov     dword ptr [esp+1Ch],eax
 0a11ff5f 61              popad
 0a11ff60 c3              ret
-[/sourcecode]
+{% endhighlight %}
 
 You always want to use the actual memory signature.  I copied this to a file, and ran the following commands against it in cygwin to get a nice YARA signature:
-[sourcecode language="bash"]
-$ awk 'BEGIN {FS=&quot; &quot;} {printf &quot;%s&quot;, $2}' tmp.txt | sed 's/\([0-9a-f]\{2\}\)/\1
+{% highlight bash %}
+$ awk 'BEGIN {FS=" "} {printf "%s", $2}' tmp.txt | sed 's/\([0-9a-f]\{2\}\)/\1
 /g'
 31 c9 64 8b 71 30 8b 76 0c 8b 76 1c 8b 46 08 8b 7e 20 8b 36 38 4f 18
  75 f3 59 01 d1 ff e1 60 8b 6c 24 24 8b 45 3c 8b 54 28 78 01 ea 8b 4a 18 8b 5a 2
 0 01 eb e3 34 49 8b 34 8b 01 ee 31 ff 31 c0 fc ac 84 c0 74 07 c1 cf 0d 01 c7 eb
 f4 3b 7c 24 28 75 e1 8b 5a 24 01 eb 66 8b 0c 4b 8b 5a 1c 01 eb 8b 04 8b 01 e8 89
  44 24 1c 61 c3
-[/sourcecode]
+{% endhighlight %}
 
 This then ends up in my rules.yar file as:
-[sourcecode language="text"]
+{% highlight text %}
 rule shellcodeFindKernel32
 {
 	meta:
-		sourceOrg = &quot;metasploit&quot;
-		sourcePath = &quot;msf3\\modules\\payloads\\singles\\windows\\messagebox.rb&quot;
+		sourceOrg = "metasploit"
+		sourcePath = "msf3\\modules\\payloads\\singles\\windows\\messagebox.rb"
 	strings:
 		$string = {31 c9 64 8b 71 30 8b 76 0c 8b 76 1c 8b 46 08 8b 7e 20 8b 36 38 4f 18 75 f3 59 01 d1 ff e1 60 8b 6c 24 24 8b 45 3c 8b 54 28 78 01 ea 8b 4a 18 8b 5a 20 01 eb e3 34 49 8b 34 8b 01 ee 31 ff 31 c0 fc ac 84 c0 74 07 c1 cf 0d 01 c7 eb f4 3b 7c 24 28 75 e1 8b 5a 24 01 eb 66 8b 0c 4b 8b 5a 1c 01 eb 8b 04 8b 01 e8 89 44 24 1c 61 c3}
 	condition: $string
 }
-[/sourcecode]
+{% endhighlight %}
 
 The next release of OpenHIPS will detect this shellcode, although it will detect the heap spray using up a lot of memory first, or hopefully the instructions used in any nop sled in a heap spray.

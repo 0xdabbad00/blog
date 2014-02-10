@@ -6,16 +6,12 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1357682300'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 In my last post, "<a href="http://0xdabbad00.com/2013/01/06/root-certificate-authority-research/">Root Certificate Authority research</a>", I had attempted to identify the certificate chains of the top 1 million sites, as identified by <a href="http://www.alexa.com/">Alexa</a>.  My data collection method was flawed, so this time around, I hope to fix that.
 
 <h3>Collecting data</h3>
 Previously, I had taken the Alexa Top 1M list, prefixed "www" to all the domains, and tried to contact the servers on port 443.  That yielded 347521 ssl capable sites.  Using that, I then ran it through this script:
-[sourcecode language="bash" gutter="false"]
+{% highlight bash %}
 #!/bin/sh
 # Filename: ./get_cert_chains.sh
 # Run as:
@@ -23,15 +19,16 @@ Previously, I had taken the Alexa Top 1M list, prefixed "www" to all the domains
 # (I have 8 cores, but some sites stall out, so I parallelized to 10)
 
 echo $1
-echo &quot;HEAD / HTTP/1.0
+echo "HEAD / HTTP/1.0
 Host: $1:443
 
 EOT
-&quot; \
-| timeout 5 openssl s_client -tls1 -CApath firefox_ca_certs -quiet -showcerts -connect $1:443 -servername $1 2&gt;cert_chains2/$1 &gt; /dev/null
-[/sourcecode]
+" \
+| timeout 5 openssl s_client -tls1 -CApath firefox_ca_certs -quiet -showcerts -connect $1:443 -servername $1 2&gt;cert_chains2/$1 > /dev/null
+{% endhighlight %}
+
 This is CPU intensive, and overnight it cranked through all the sites.  Example output for www.bankofamerica.com is:
-<pre>
+{% highlight text %}
 depth=3 /C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authority
 verify return:1
 depth=2 /C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, Inc. - For authorized use only/CN=VeriSign Class 3 Public Primary Certification Authority - G5
@@ -41,7 +38,7 @@ verify return:1
 depth=0 /1.3.6.1.4.1.311.60.2.1.3=US/1.3.6.1.4.1.311.60.2.1.2=Delaware/2.5.4.15=Private Organization/serialNumber=2927442/C=US/postalCode=60603/ST=Illinois/L=Chicago/streetAddress=135 S La Salle St/O=Bank of America Corporation/OU=Network Infrastructure
 verify return:1
 read:errno=0
-</pre>
+{% endhighlight %}
 
 Files are available at <a href="https://www.dropbox.com/s/kowtza4kucx12vn/cert_chains.tar.gz">cert_chains.tar.gz (22MB)</a>
 
@@ -53,10 +50,10 @@ I then grepped through these files for the Turktrust cert (just grepped for "RKT
 This list is smaller than the previous 50 I had found, because it turns out that some of the sites I found last time do not have verifiable certs (such as <a href="https://www.mydnn.ir">https://www.mydnn.ir</a>).
 
 All of these sites had the following certificate chain after the leaf node:
-<pre>
+{% highlight text %}
 depth=2 /CN=T\xC3\x9CRKTRUST Elektronik Sertifika Hizmet Sa\xC4\x9Flay\xC4\xB1c\xC4\xB1s\xC4\xB1/C=TR/L=Ankara/O=T\xC3\x9CRKTRUST Bilgi \xC4\xB0leti\xC5\x9Fim ve Bili\xC5\x9Fim G\xC3\xBCvenli\xC4\x9Fi Hizmetleri A.\xC5\x9E. (c) Kas\xC4\xB1m 2005
 depth=1 /CN=T\xC3\x9CRKTRUST Elektronik Sunucu Sertifikas\xC4\xB1 Hizmetleri/C=TR/O=T\xC3\x9CRKTRUST Bilgi \xC4\xB0leti\xC5\x9Fim ve Bili\xC5\x9Fim G\xC3\xBCvenli\xC4\x9Fi Hizmetleri A.\xC5\x9E. (c) Kas\xC4\xB1m  2005
-</pre>
+{% endhighlight %}
 
 <h3>Finding all CAs in use by the homepages of the top 1M sites</h3>
 It is important to note that both of those certs can technically sign certificates pretending to be any site.  Root CAs and Intermediate CAs have the same power.  The only difference is a root CA is stored in the browsers, whereas the Intermediate CAs need to be signed by a root CA, or in a chain of Intermediate CAs that ultimately gets to the root.

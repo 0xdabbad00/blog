@@ -12,7 +12,7 @@ meta:
 ---
 A few days ago on 2011.03.01 Google bought <a href="zynamics.com">Zynamics</a>.  I've held off on posting this just for the sake of posting it, because I wanted to find someone who would say why.  Zynamics makes software to compare disassembles of code (to compare versions of malware, identify vulns that patches were made for, look for copyright infringement by finding people using your code, etc.), dissect pdf's for malware, and similar work.
 
-I guess one reason is simply to add more security people (as they did in the past with Travis Ormandy).  Google has been pushing hard to keep Chrome secure, as is evidenced by their <a href="https://threatpost.com/en_us/blogs/google-fixes-19-bugs-chrome-pays-14k-bug-bounties-030111">payouts of bounties for security bugs</a>.  Granted, they only paid out $14K for 19 bugs in that post, and it is assumed that a good security bug can be worth a lot more than that average price of roughly $1K/bug.
+I guess one reason is simply to add more security people (as they did in the past with Tavis Ormandy).  Google has been pushing hard to keep Chrome secure, as is evidenced by their <a href="https://threatpost.com/en_us/blogs/google-fixes-19-bugs-chrome-pays-14k-bug-bounties-030111">payouts of bounties for security bugs</a>.  Granted, they only paid out $14K for 19 bugs in that post, and it is assumed that a good security bug can be worth a lot more than that average price of roughly $1K/bug.
 
 Additionally, Google has an interest of identifying sites hosting malicious content and flagging emails with malicious attachments, malicious pdf's you view through it's reader, or docs you look at it through it's various document tools.
 

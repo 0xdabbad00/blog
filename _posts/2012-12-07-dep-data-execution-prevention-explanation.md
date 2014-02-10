@@ -15,8 +15,8 @@ There is some confusion about DEP and the need for it.  People seem to incorrect
 
 Let's walk through some examples of code to show exactly what DEP is protecting.  This may be surprising for those that think Java can't use DEP.  Here is our sample code:
 
-[sourcecode language="c"]
-#include &lt;windows.h&gt;
+{% highlight c %}
+#include <windows.h>
 
 int main(int argc, char **argv) {
 	char shellcode[] = {
@@ -36,60 +36,64 @@ int main(int argc, char **argv) {
 	memcpy(exec, shellcode, sizeof shellcode);
 	((void(*)())exec)();
 }
-[/sourcecode]
+{% endhighlight %}
 
-I took this shellcode from <a href="http://code.google.com/p/w32-msgbox-shellcode/">http://code.google.com/p/w32-msgbox-shellcode/</a>.  It simply pops up a message box saying "Hello world" and then the final 0xCC (an <code>int 3</code>) at the end causes a break-point.  Line 17 allocates memory that has all permissions (read, write, execute).   Then I copy the shellcode to that location, and line 19 runs it as if it were a function (it looks weird but that line works).
+I took this shellcode from <a href="http://code.google.com/p/w32-msgbox-shellcode/">http://code.google.com/p/w32-msgbox-shellcode/</a>.  It simply pops up a message box saying "Hello world" and then the final 0xCC (an `int 3`) at the end causes a break-point.  Line 17 allocates memory that has all permissions (read, write, execute).   Then I copy the shellcode to that location, and line 19 runs it as if it were a function (it looks weird but that line works).
 
 <b>This shellcode will execute whether DEP is enabled or not.</b>  I specifically requested execute privileges on the memory I alloc'd, so DEP does not protect against that. I asked for it.  That is why JIT works.  If you specifically say "I want this to execute", then DEP will not stop it from executing.
 
 If you'd like to try this out, then in Visual Studio look for the /NXCOMPAT option under Project->Properties->Linker->Advanced.  "/NXCOMPAT:NO" means no DEP (no protection), whereas the default "/NXCOMPAT" means "Yes" protect the executable with DEP.
+
 <a href="http://0xdabbad00.com/wp-content/uploads/2012/12/DEP_VS2010.png"><img src="http://0xdabbad00.com/wp-content/uploads/2012/12/DEP_VS2010-300x211.png" alt="" title="VS2010 DEP setting" width="300" height="211" class="alignnone size-medium wp-image-621" /></a>
 
 When run, this causes the following pop-ups.
+
 <a href="http://0xdabbad00.com/wp-content/uploads/2012/12/messagebox_shellcode.png"><img src="http://0xdabbad00.com/wp-content/uploads/2012/12/messagebox_shellcode.png" alt="" title="Shellcode" width="144" height="144" class="alignnone size-full wp-image-622" /></a> <a href="http://0xdabbad00.com/wp-content/uploads/2012/12/breakpoint.png"><img src="http://0xdabbad00.com/wp-content/uploads/2012/12/breakpoint-300x131.png" alt="" title="breakpoint" width="300" height="131" class="alignnone size-medium wp-image-623" /></a>
 
 The second pop-up may vary (I was running while debugging under Visual Studio).
 
 Now let's change the VirtualAlloc line to:
-[sourcecode language="c" firstline="17"]
+{% highlight c %}
 void *exec = VirtualAlloc(0, sizeof shellcode, MEM_COMMIT, PAGE_READWRITE);
-[/sourcecode]
-This time things do not work because I am requesting <code>PAGE_READWRITE</code> instead of <code>PAGE_EXECUTE_READWRITE</code>.  <b>If you do not specifically request execute privileges, and you compile with DEP, DEP will not let that memory execute.</b>  This time I get this message:
+{% endhighlight %}
+This time things do not work because I am requesting `PAGE_READWRITE` instead of `PAGE_EXECUTE_READWRITE`.  <b>If you do not specifically request execute privileges, and you compile with DEP, DEP will not let that memory execute.</b>  This time I get this message:
+
 <a href="http://0xdabbad00.com/wp-content/uploads/2012/12/access_violation.png"><img src="http://0xdabbad00.com/wp-content/uploads/2012/12/access_violation-300x131.png" alt="" title="Access Violation" width="300" height="131" class="alignnone size-medium wp-image-626" /></a>
+
 The error code 0xC0000005 means "Access Violation" meaning that I tried to execute memory that was not executable.  Thank you DEP!  Now if you turn off DEP and recompile, it pops the "Hello world" message again.
 
 So this seems good so far, but most code does not specify the permissions on the memory when it alloc's it.  Instead you just do:
-[sourcecode language="c" firstline="17"]
+{% highlight c %}
 void *exec = (void *)LocalAlloc(LMEM_ZEROINIT, sizeof shellcode);
-[/sourcecode]
+{% endhighlight %}
 
-When you use <code>LocalAlloc</code> (or any other memory function where you don't specify the permissions), it's basically the same as specifying as calling <code>VirtualAlloc</code> with <code>PAGE_READWRITE</code>, because with DEP you are protected, but without, the shellcode runs.
+When you use `LocalAlloc` (or any other memory function where you don't specify the permissions), it's basically the same as specifying as calling `VirtualAlloc` with `PAGE_READWRITE`, because with DEP you are protected, but without, the shellcode runs.
 
-Now JIT code does not just alloc all it's mem <code>PAGE_EXECUTE_READWRITE</code>.  You should never have memory that is both writable and executable.  That's asking for trouble.  Instead you should alloc the mem with read/write perms, copy the data in, change the permissions to execute only (read is not actually necessary), then execute it:
-[sourcecode language="c" firstline="17"]
+Now JIT code does not just alloc all it's mem `PAGE_EXECUTE_READWRITE`.  You should never have memory that is both writable and executable.  That's asking for trouble.  Instead you should alloc the mem with read/write perms, copy the data in, change the permissions to execute only (read is not actually necessary), then execute it:
+{% highlight c %}
 void *exec = VirtualAlloc(0, sizeof shellcode, MEM_COMMIT, PAGE_READWRITE);
 memcpy(exec, shellcode, sizeof shellcode);
 DWORD ignore;
 VirtualProtect(exec, sizeof shellcode, PAGE_EXECUTE, &amp;ignore);
 ((void(*)())exec)();
-[/sourcecode]
+{% endhighlight %}
 This code works with DEP enabled.
 
 <h3>What about 64-bit?</h3>
 <b>All 64-bit executables are DEP enabled, no matter what.</b>  For simplicity (since I'm too lazy to find any 64-bit shellcode), let's use this shellcode in our same program:
 
-[sourcecode language="c" firstline="4"]
+{% highlight c %}
 	char shellcode[] = { 
 		0xCC
 	};
-[/sourcecode]
+{% endhighlight %}
 
-A 32-bit exe that copied this to memory that was not specified as being executable, and was compiled without DEP protection, would pop a message about a break point.  With DEP it would pop a message about an access violation.  In 64-bit, whether or not you enable DEP (I checked the NXCOMPAT flag in the binary using <a href="http://icebuddha.com/">http://icebuddha.com/</a>), it will always pop a message about an access violation.  If you change the permissions to <code>PAGE_EXECUTE_READWRITE</code> it will pop a message about a break point.
+A 32-bit exe that copied this to memory that was not specified as being executable, and was compiled without DEP protection, would pop a message about a break point.  With DEP it would pop a message about an access violation.  In 64-bit, whether or not you enable DEP (I checked the NXCOMPAT flag in the binary using <a href="http://icebuddha.com/">http://icebuddha.com/</a>), it will always pop a message about an access violation.  If you change the permissions to `PAGE_EXECUTE_READWRITE` it will pop a message about a break point.
 
 <h3>What about DLL's?</h3>
 <b>Only the .exe matters for DEP.</b>   To test this, let's make a DLL (I call mine test_dll.dll) with our original code:
-[sourcecode language="c"]
-#include &lt;windows.h&gt;
+{% highlight c %}
+#include <windows.h>
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
     char shellcode[] = {
@@ -109,16 +113,16 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
     memcpy(exec, shellcode, sizeof shellcode);
     ((void(*)())exec)();
 }
-[/sourcecode]
+{% endhighlight %}
 
 Then for the .exe just use:
-[sourcecode language="c"]
-#include &lt;windows.h&gt;
+{% highlight c %}
+#include <windows.h>
 
 int main(int argc, char **argv) {
-	LoadLibrary(&quot;test_dll.dll&quot;);
+	LoadLibrary("test_dll.dll");
 }
-[/sourcecode]
+{% endhighlight %}
 
 Please do not code like this in the real world.  I am just showing examples using the bare minimum of code.
 

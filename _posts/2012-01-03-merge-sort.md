@@ -6,14 +6,10 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1333595199'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 I sometimes want a simple merge sort to review.  This one is simple, runs, and shows where it would be optimized in the real world.
 
-[sourcecode language="java"]
+{% highlight java %}
 public class test {
 	private static final int minMergeSortListSize = 32;
 
@@ -77,4 +73,4 @@ public class test {
 		disp(a);
 	}
 }
-[/sourcecode] 
+{% endhighlight %}

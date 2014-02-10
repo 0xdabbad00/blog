@@ -6,10 +6,6 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1357712709'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 <b>Update 2013.01.07</b>: asteriskpound on <a href="http://www.reddit.com/r/netsec/comments/162rxw/root_certificate_authority_research/">reddit</a> has pointed out a flaw in how I determine the root certifcate, and how I calculate the length of the certificate.  The flaw is that I thought that the last certificate in the "certificate chain" from openssl's output would always be the root of the chain, but actually this "chain" can be very broken (as is the case with me thinking www.olivenoel.com had 21 certificates in it's chain).  I don't expect my final results to be very different, but I will need to re-evaluate before these results can be trusted.
 
@@ -104,81 +100,82 @@ Not really relevant, but I found it interesting to see how many certs were in th
 
 <h3>Appendix</h3>
 To grab cert info from the Alexa Top 1 Million sites list, I create a bash script called <b><tt>output_cert_info.sh</tt></b> with the following:
-[sourcecode language="bash" gutter="false"]
+{% highlight bash %}
 #!/bin/sh
 echo $1
-timeout 3 openssl s_client -connect $1:443 &lt; /dev/null &gt; data/$1 2&gt;/dev/null
+timeout 3 openssl s_client -connect $1:443 < /dev/null > data/$1 2>/dev/null
 
-echo &quot;HEAD / HTTP/1.0
+echo "HEAD / HTTP/1.0
 Host: $1:443
 
 EOT
-&quot; \
-| timeout 3 openssl s_client -connect $1:443 2&gt;/dev/null \
+" \
+| timeout 3 openssl s_client -connect $1:443 2>/dev/null \
 | sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' \
-| openssl x509 -noout -text -certopt no_signame &gt; x509/$1 2&gt;/dev/null
-[/sourcecode]
+| openssl x509 -noout -text -certopt no_signame > x509/$1 2>/dev/null
+{% endhighlight %}
 
 and ran it with the following:
-[sourcecode language="bash" gutter="false"]
+{% highlight bash %}
 cat top-1m.csv | sed 's/.*,/www./g' | xargs -P50 -I {} ./output_cert_info.sh {}
 # Takes about 16 hours
-[/sourcecode]
+
+{% endhighlight %}
 
 That turns all the sites into www. names, and using some <a href="http://web.archive.org/web/20110520140532/http://teddziuba.com/2010/10/taco-bell-programming.html">Taco Bell Programming</a> to parallelize this.  The bash script itself will record data about the certificate chain to the <tt>./data</tt> dir and the x509 cert itself to <tt>./x509</tt>.
 
 To extract the certificate path info from the data directory, I wrote a python script called <b><tt>gatherData.py</tt></b>:
-[sourcecode language="python" gutter="false"]
+{% highlight python %}
 import sys
 import os
 import re
 
 for filename in sys.stdin:
-	filename = filename.strip()
-	site = os.path.basename(filename)
-	try:
-		with open(filename) as f:
-		    content = f.readlines()
-		    certData = False
-		    certNum = 0
-		    isIssuer = False
-		    subject = &quot;&quot;
-		    issuer = &quot;&quot;
-		    root = &quot;&quot;
-		    for line in content:
-		    	line = line.strip()
+    filename = filename.strip()
+    site = os.path.basename(filename)
+    try:
+        with open(filename) as f:
+            content = f.readlines()
+            certData = False
+            certNum = 0
+            isIssuer = False
+            subject = ""
+            issuer = ""
+            root = ""
+            for line in content:
+                line = line.strip()
 
-		    	if line == &quot;Certificate chain&quot;:
-		    		certData = True
-		    		continue
-		    	if certData:
-		    		if line == &quot;---&quot;:
-		    			certData = False
-		    			break
-		    		if not isIssuer:
-		    			if subject == &quot;&quot;:
-		    				subject = re.sub(&quot;%d s:&quot; % certNum, &quot;&quot;, line)
-		    			certNum += 1
-		    			isIssuer = not isIssuer
-		    			continue
-		    		if isIssuer:
-		    			root = re.sub(&quot;i:&quot;, &quot;&quot;, line)
-		    			if issuer == &quot;&quot;:
-		    				issuer = root
-		    			isIssuer = not isIssuer
-		    			continue
-		    print &quot;%s|%d|%s|%s|%s&quot; % (site, certNum, subject, issuer, root)
-		    sys.stdout.flush()
-	except:
-		print &quot;%s|-1|||&quot; % (site)
-[/sourcecode]
+                if line == "Certificate chain":
+                    certData = True
+                    continue
+                if certData:
+                    if line == "---":
+                        certData = False
+                        break
+                    if not isIssuer:
+                        if subject == "":
+                            subject = re.sub("%d s:" % certNum, "", line)
+                        certNum += 1
+                        isIssuer = not isIssuer
+                        continue
+                    if isIssuer:
+                        root = re.sub("i:", "", line)
+                        if issuer == "":
+                            issuer = root
+                        isIssuer = not isIssuer
+                        continue
+            print "%s|%d|%s|%s|%s" % (site, certNum, subject, issuer, root)
+            sys.stdout.flush()
+    except:
+        print "%s|-1|||" % (site)
+{% endhighlight %}
 
 I ran this with:
-[sourcecode language="bash" gutter="false"]
+{% highlight bash %}
 cd data
-ls -f | python ../gather_data.py &gt; ../certPaths
+ls -f | python ../gather_data.py > ../certPaths
 # Takes about an hour
-[/sourcecode]
+{% endhighlight %}
 
 The generated file (<tt>certPaths</tt>) is only 988257 lines long, instead of 1 million, because the original list has a lot of non-site lines, such as maharojgar.gov.in/~selfemp.
 

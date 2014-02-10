@@ -6,56 +6,52 @@ tags: []
 status: publish
 type: post
 published: true
-meta:
-  _edit_lock: '1354900608'
-  _edit_last: '2'
-  _syntaxhighlighter_encoded: '1'
 ---
 One of the tricky parts in building IceBuddha is that it needs to be able to display the hexdump for an entire binary.  My goal has been to be able to do this for any binary under 10MB.  IceBuddha reads the entire binary into memory into an array called data.  To display a hexdump, my first solution was to just convert this to to html with something like:
-[sourcecode language="html" gutter="false"]
-&lt;pre&gt;
+{% highlight html %}
+<pre>
 00000000h 4D 5A 90 00 03 00 00 00 04  00 00 00 FF FF 00 00 MZ..............
 00000010h B8 00 00 00 00 00 00 00 40  00 00 00 00 00 00 00 ........@.......
-&lt;/pre&gt;
-[/sourcecode]
+</pre>
+{% endhighlight %}
 
 I wanted to be able to high-lite bytes though, which gives two options:
 <ul>
 <li><b>Solution 1: Sub-string and refresh</b><br>I could recreate the html with my desired data inside a DOM element with it's own high-liting.
-[sourcecode language="html" gutter="false"]
-&lt;pre&gt;
-00000000h &lt;i id=&quot;highlite&quot;&gt;4D 5A&lt;/i&gt; 90 00 03 00 00 00 04  00 00 00 FF FF 00 00 MZ..............
-&lt;/pre&gt;
-[/sourcecode]
+{% highlight html %}
+<pre>
+00000000h <i id="highlite">4D 5A</i> 90 00 03 00 00 00 04  00 00 00 FF FF 00 00 MZ..............
+</pre>
+{% endhighlight %}
 
 <li><b>Solution 1: Lots of DOM elements</b><br>
 I could make each hex value it's own DOM element.
-[sourcecode language="html" gutter="false"]
-&lt;pre&gt;
+{% highlight html %}
+<pre>
 00000000h 
-&lt;i id=&quot;h0&quot;&gt;4D&lt;/i&gt; 
-&lt;i id=&quot;h1&quot;&gt;5A&lt;/i&gt; 
-&lt;i id=&quot;h2&quot;&gt;90&lt;/i&gt; 
-&lt;i id=&quot;h3&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h4&quot;&gt;03&lt;/i&gt; 
-&lt;i id=&quot;h5&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h6&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h7&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h8&quot;&gt;04&lt;/i&gt; 
-&lt;i id=&quot;h9&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h10&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h11&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h12&quot;&gt;FF&lt;/i&gt; 
-&lt;i id=&quot;h13&quot;&gt;FF&lt;/i&gt; 
-&lt;i id=&quot;h14&quot;&gt;00&lt;/i&gt; 
-&lt;i id=&quot;h15&quot;&gt;00&lt;/i&gt; 
+<i id="h0">4D</i> 
+<i id="h1">5A</i> 
+<i id="h2">90</i> 
+<i id="h3">00</i> 
+<i id="h4">03</i> 
+<i id="h5">00</i> 
+<i id="h6">00</i> 
+<i id="h7">00</i> 
+<i id="h8">04</i> 
+<i id="h9">00</i> 
+<i id="h10">00</i> 
+<i id="h11">00</i> 
+<i id="h12">FF</i> 
+<i id="h13">FF</i> 
+<i id="h14">00</i> 
+<i id="h15">00</i> 
 MZ..............
-&lt;/pre&gt;
-[/sourcecode]
+</pre>
+{% endhighlight %}
 If I want to flip on high-liting somewhere, all I need to do is:
-[sourcecode language="javascript" gutter="false"]
-$(&quot;#h&quot;+i).css(&quot;background&quot;, color);
-[/sourcecode]
+{% highlight javascript %}
+$("#h"+i).css("background", color);
+{% endhighlight %}
 </ul>
 
 I decided to go with the second option, because it seemed easier to work with.  
@@ -66,23 +62,23 @@ I decided to ignore this problem for a long time and just get the rest of the ap
 
 For those that want to follow along, I made a tag of my code on github called "scrollable" which allows you to download <a href="https://github.com/0xdabbad00/icebuddha/archive/scrollable.zip">icebuddha-scrollable.zip</a>.  This is commit <a href="https://github.com/0xdabbad00/icebuddha/tree/6856d57c616dfae11d889a60b91193c55419161d">6856d57c616dfae11d889a60b91193c55419161d</a>.
 
-I need to refactor badly, but here is what is going on.  All the hex data is displayed in a div called <code>#byte_content</code>, which has the css <code>max-height: 200px; overflow-y: scroll;</code> applied to it, which means this is the "view window" and will have a scroll bar.
+I need to refactor badly, but here is what is going on.  All the hex data is displayed in a div called `#byte_content`, which has the css `max-height: 200px; overflow-y: scroll;` applied to it, which means this is the "view window" and will have a scroll bar.
 
-In <code>drop.js</code> there is a function <code>getByteContentHTML(...)</code> that creates a giant table that is mostly going to be empty:
+In `drop.js` there is a function `getByteContentHTML(...)` that creates a giant table that is mostly going to be empty:
 
-[sourcecode language="javascript" gutter="false"]
+{% highlight javascript %}
 tableHeight = data.length/BYTES_PER_LINE * FONT_HEIGHT;
 preHeight = start/BYTES_PER_LINE * FONT_HEIGHT;
 
-tableHeightStyle = &quot;style=\&quot;min-height:&quot;+tableHeight+&quot;px; height:&quot;+tableHeight+&quot;px; border-spacing: 0px;\&quot;&quot;;
-preHeightStyle = &quot;style=\&quot;min-height:&quot;+preHeight+&quot;px; height:&quot;+preHeight+&quot;px;\&quot;&quot;;
+tableHeightStyle = "style=\"min-height:"+tableHeight+"px; height:"+tableHeight+"px; border-spacing: 0px;\"";
+preHeightStyle = "style=\"min-height:"+preHeight+"px; height:"+preHeight+"px;\"";
 
-output.push(&quot;&lt;table border=0 cellpadding=0 cellspacing=0 &quot;+tableHeightStyle+&quot; id=\&quot;byteScrollableArea\&quot;&gt;&quot;);
-output.push(&quot;&lt;tr &quot;+preHeightStyle+&quot;&gt;&lt;td &quot;+preHeightStyle+&quot; id=\&quot;byteFillerAbove\&quot;&gt;&lt;td&gt;&lt;td&gt;&lt;/tr&gt;&quot;);
-output.push(&quot;&lt;tr&gt;....&quot;);
-[/sourcecode]
+output.push("<table border=0 cellpadding=0 cellspacing=0 "+tableHeightStyle+" id=\"byteScrollableArea\">");
+output.push("<tr "+preHeightStyle+"><td "+preHeightStyle+" id=\"byteFillerAbove\"><td><td></tr>");
+output.push("<tr>....");
+{% endhighlight %}
 
-So I make a giant table (<code>#byteScrollableArea</code>), and the first row (<code>#byteFillerAbove</code>) is going to be empty and includes whatever is above the drawn data (<code>#hexCell</code> and some other stuff), then the data gets written which will extend above and below the currently visible area, and then the table just extends down to the bottom of whatever is left of the file.  I tried to diagram this.
+So I make a giant table (`#byteScrollableArea`), and the first row (`#byteFillerAbove`) is going to be empty and includes whatever is above the drawn data (`#hexCell` and some other stuff), then the data gets written which will extend above and below the currently visible area, and then the table just extends down to the bottom of whatever is left of the file.  I tried to diagram this.
 <a href="http://0xdabbad00.com/wp-content/uploads/2012/11/scrollable_diagram.png"><img src="http://0xdabbad00.com/wp-content/uploads/2012/11/scrollable_diagram-300x215.png" alt="" title="Scroll area" width="300" height="215" class="alignnone size-medium wp-image-557" /></a>
 
 The reason for all this, is I wanted the scrollbar to still give an indication of where the user is looking at in the file.  Are they looking at the start? The bottom?  If I just displayed the first 2K bytes, and then appended to these as they scrolled (like the infinite scrolling in twitter) you would have two problems:
@@ -100,47 +96,47 @@ Now that I can display data from anywhere in the file, the next trick is how do 
 <li><a href="http://imakewebthings.com/jquery-waypoints/">jQuery Waypoints</a> Used in infinite scrolling solutions to load data as we get to elements.
 </ul>
 
-Whenever I draw the data to the screen, in <code>displayHexDump</code>, I do the following:
-[sourcecode language="javascript" gutter="false"]
+Whenever I draw the data to the screen, in `displayHexDump`, I do the following:
+{% highlight javascript %}
 $('#byte_content').unbind('scroll', outOfRangeScrollHandler);
 
-$('#byte_content').scrollTo($(&quot;#h&quot;+position), 1, {onAfter:function(){
+$('#byte_content').scrollTo($("#h"+position), 1, {onAfter:function(){
   SetupScrollDownWaypoint();
   SetupScrollUpWaypoint();
 
   // If the user grabs the scroll bar, make sure to refresh the screen
   $('#byte_content').bind('scroll', outOfRangeScrollHandler);
 }});
-[/sourcecode]
+{% endhighlight %}
 
-The functions <code>SetupScrollDownWaypoint();</code> and <code>SetupScrollUpWaypoint();</code> don't actually exist, but that is what the code is doing.  I used these waypoints a lot originally, but then I realized that if the user just grabs the scroll bar and yanks it to the bottom of the file, you can jump past the way point and no data get's displayed, so I had to create the function <code>outOfRangeScrollHandler</code> to see if the user was displaying our data or had scrolled outside of it (the waypoint code may no longer be necessary due to this function).
+The functions `SetupScrollDownWaypoint();` and `SetupScrollUpWaypoint();` don't actually exist, but that is what the code is doing.  I used these waypoints a lot originally, but then I realized that if the user just grabs the scroll bar and yanks it to the bottom of the file, you can jump past the way point and no data get's displayed, so I had to create the function `outOfRangeScrollHandler` to see if the user was displaying our data or had scrolled outside of it (the waypoint code may no longer be necessary due to this function).
 
-[sourcecode language="javascript" gutter="false"]
+{% highlight javascript %}
 var outOfRangeScrollHandler = function() {
 	scrollPos = $('#byte_content').scrollTop();
 	topOfContent = $('#byteFillerAbove').height();
 	contentHeight = FONT_HEIGHT * LINES_TO_DISPLAY;
 
-	if ((scrollPos &lt; topOfContent - (FONT_HEIGHT * 1)) || 
-		(scrollPos &gt; (topOfContent+contentHeight) + (FONT_HEIGHT * 1))) {
+	if ((scrollPos < topOfContent - (FONT_HEIGHT * 1)) || 
+		(scrollPos > (topOfContent+contentHeight) + (FONT_HEIGHT * 1))) {
 		scrollLocation = (scrollPos / FONT_HEIGHT) * BYTES_PER_LINE;
 
 		scrollToByte(scrollLocation);
 	}
 };
-[/sourcecode]
+{% endhighlight %}
 
 I also do some checks if the mouse button is down or not to see if the user is still dragging the scroll bar around.
 
-Once the code decides the user has scrolled outside the screen, it calls a common function I wrote called <code>scrollToByte(scrollLocation);</code>.  This checks if the scroll location is outside of the currently painted data, and if it is, then repaint the data (set up waypoints again, etc.) and go there, else, smoothly scroll to the location with jQuery.ScrollTo.
+Once the code decides the user has scrolled outside the screen, it calls a common function I wrote called `scrollToByte(scrollLocation);`.  This checks if the scroll location is outside of the currently painted data, and if it is, then repaint the data (set up waypoints again, etc.) and go there, else, smoothly scroll to the location with jQuery.ScrollTo.
 
-[sourcecode language="javascript" gutter="false"]
+{% highlight javascript %}
 function scrollToByte(start) {
-	if (hexDumpStart &gt; start || hexDumpEnd &lt; start) {
+	if (hexDumpStart > start || hexDumpEnd < start) {
 		displayHexDump(start - start % BYTES_PER_LINE);
 	} else {
-		var location = $(&quot;#h&quot;+start);
+		var location = $("#h"+start);
 		$('#byte_content').scrollTo(location, 800);
 	}
 }
-[/sourcecode] 
+{% endhighlight %} 
