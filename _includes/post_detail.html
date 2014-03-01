@@ -1,9 +1,17 @@
-<h1 class="entry-title">
+
 {% if page.title %}
+<h1 class="entry-title">
 <a href="{{ root_url }}{{ page.url }}">{{ page.title }}</a>
-{% endif %}
-{% if post.title %}
-<a href="{{ root_url }}{{ post.url }}">{{ post.title }}</a>
-{% endif %}
 </h1>
+<p class="meta">{{ page.date | date_to_string }}</p>
+{% endif %}
+
+{% if post.title %}
+<h1 class="entry-title">
+<a href="{{ root_url }}{{ post.url }}">{{ post.title }}</a>
+</h1>
+<p class="meta">{{ post.date | date_to_string }}</p>
+{% endif %}
+
+
 <div class="entry-content">{{ content }}</div>
