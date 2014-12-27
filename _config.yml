@@ -1,6 +1,6 @@
 name: '0xdabbad00'
 markdown: redcarpet
-pygments: true
+highlighter: pygments
 paginate: 1
 safe: true
 lsi: false
