@@ -13,20 +13,32 @@ html, body { height: 100%; width: 100%;}
 
 body {
   background-color: #FFF;
-  font: 13.34px Helvetica, Arial, sans-serif;
+  font: 13.34px "Lato", Helvetica, Arial, sans-serif;
   font-size: small;
+  font-weight: 400;
+}
+
+
+.content h1.entry-title, .content  .post-title h2 {
+  margin-top: 0px;
+  font-size: 150%;
+  margin-left: -1.5em;
 }
 
 h1 {
-  font-size: 130%;
+    font-size: 130%;
 }
 
 h2 {
-  font-size: 120%;
+  font-size: 110%;
 }
 
 h3 {
-  font-size: 110%;
+  font-size: 105%;
+}
+
+.content h1 { 
+    margin-left: -1.5em;
 }
 
 
@@ -88,6 +100,20 @@ table, td, th
   color: #aaa;
   font-family: Monaco, "Courier New", monospace;
   font-size: 80%;
+}
+
+.content h1 {
+    font-size: 20px;
+    margin-top: 80px;
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.content h2 {
+    font-size: 18px;
+    margin-top: 30px;
+    margin-bottom: 5px;
+    color: #000;
 }
 
 /*****************************************************************************/
@@ -203,34 +229,33 @@ h1 .title {
   padding-left: 2px;
 }
 
-.post pre {
-  border: 1px solid #ddd;
-  background-color: #eef;
-  padding: 0 .4em;
-}
-
-.post ul, .post ol {
+.content ul, .content ol {
   margin-left: 1.35em;
 }
 
-.post code {
+code {
   border: 1px solid #ddd;
   background-color: #eef;
   padding: 0 .2em;
 }
 
-.post pre code {
+pre {
+  border: 1px solid #ddd;
+  background-color: #eef;
+}
+
+pre code {
   border: none;
 }
 
 /* terminal */
-.post pre.terminal {
+pre.terminal {
   border: 1px solid #000;
   background-color: #333;
   color: #FFF;
 }
 
-.post pre.terminal code {
+pre.terminal code {
   background-color: #333;
 }
 
