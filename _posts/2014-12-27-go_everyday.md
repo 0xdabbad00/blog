@@ -40,7 +40,9 @@ github.com/zenazn/goji v0.8.1
 <a name="tip2"></a>
 Tip 2: Use direnv for per project GOPATHs
 =========================================
-If you're using the Go Package Manager, you'll need to set your GOPATH variable for each project.  The GPM developer wrote a tool called [GVP](https://github.com/pote/gvp) (Go Versioning Packager) to assist with this.  It's simply a bash script that sets your GOPATH.  You `cd` to your project, then run `gvp`, and your `GOPATH` is set.  I find it easier to use [direnv](http://direnv.net/) which will automatically do this for me whenever I `cd` into the directory.
+If you're using the Go Package Manager, you may want to set your GOPATH variable for each project. Many people use a single GOPATH for multiple projects, so this may not be needed for your setup.
+
+The GPM developer wrote a tool called [GVP](https://github.com/pote/gvp) (Go Versioning Packager) to assist with this.  It's simply a bash script that sets your GOPATH.  You `cd` to your project, then run `gvp`, and your `GOPATH` is set.  I find it easier to use [direnv](http://direnv.net/) which will automatically do this for me whenever I `cd` into the directory.
 
 My `.envrc` file is
 
