@@ -27,15 +27,16 @@ sudo pip install pika==0.9.8
 <h3>The Producer</h3>
 First we'll make our web app queue messages.  I'm also using our new <tt>utils.py</tt> library now.
 
-(highlight="7,8,29,30,31,32,33,34,35,36,37,39")
+<!-- highlight="7,8,29,30,31,32,33,34,35,36,37,39" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
 # file: webserver.py
- 
+
 import tornado.ioloop
 import tornado.web
 
+# + Add these libraries
 import utils
 import pika
 
@@ -59,6 +60,7 @@ class UploadHandler(tornado.web.RequestHandler):
             f.write(file_contents)
         self.finish()
 
+        # + Queue the file
         # Queue work message
         connection = pika.BlockingConnection(pika.ConnectionParameters(
                        'localhost'))
@@ -71,13 +73,13 @@ class UploadHandler(tornado.web.RequestHandler):
 
 
 cur, db = utils.connectToDB()
- 
+
 application = tornado.web.Application([
     (r"/file-upload", UploadHandler),
     (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
@@ -94,7 +96,7 @@ uploaded\_files	1
 <h3>The Consumer</h3>
 Now we'll fix up our file <tt>yarascanner.py</tt> to consume these work messages.
 
-(highlight="8,43,44,45,46,47,49,50,51,52,53,54,55,57,58")
+<!-- highlight="8,43,44,45,46,47,49,50,51,52,53,54,55,57,58" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
@@ -116,7 +118,7 @@ def scanFile(file_id):
         stmt = "SELECT id FROM rules WHERE name = %(name)s AND enabled=1"
         cur.execute(stmt, {'name': match})
         rule_id = cur.fetchone()[0]
-        
+
         stmt = "INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)"
         cur.execute(stmt, {'file_id': file_id, 'rule_id': rule_id})
         db.commit()
@@ -161,7 +163,7 @@ channel.start_consuming()
 <h3>MD5 hash the file</h3>
 One of thing I want our <tt>yarascanner.py</tt> to do is MD5 hash the file.  Seems like a good idea to do it here instead of web server where we don't want to block.  You could make another service for this, with another queue, if you wanted, but I don't want to clutter up this lesson too much.
 
-(highlight="9,27,28,29,30,31,32,34,35,36,37")
+<!-- highlight="9,27,28,29,30,31,32,34,35,36,37" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
@@ -185,7 +187,7 @@ def scanFile(file_id):
         stmt = ";SELECT id FROM rules WHERE name = %(name)s AND enabled=1";
         cur.execute(stmt, {'name': match})
         rule_id = cur.fetchone()[0]
-        
+
         stmt = ";INSERT INTO matches (file_id, rule_id) VALUES (%(file_id)s, %(rule_id)s)";
         cur.execute(stmt, {'file_id': file_id, 'rule_id': rule_id})
         db.commit()
@@ -244,19 +246,19 @@ channel.start_consuming()
 <h3>Getting results</h3>
 At this point, a user can upload a file and it will get scanned and hashed, but they won't be able to see any of the results, so let's work on our web server a little to give some feedback.  We'll just create some handlers that can show them the database data as json output.
 
-(highlight="10,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,48,49,50,51,52,53,54,55,85,86,87")
+<!-- highlight="10,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,48,49,50,51,52,53,54,55,85,86,87" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
 # file: webserver.py
- 
+
 import tornado.ioloop
 import tornado.web
 import tornado.escape
 
 import utils
 import pika
-from datetime import datetime 
+from datetime import datetime
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -334,7 +336,7 @@ class UploadHandler(tornado.web.RequestHandler):
 
 
 cur, db = utils.connectToDB()
- 
+
 application = tornado.web.Application([
     (r"/file-upload", UploadHandler),
     (r"/getFiles", GetFilesHandler),
@@ -343,7 +345,7 @@ application = tornado.web.Application([
     (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()

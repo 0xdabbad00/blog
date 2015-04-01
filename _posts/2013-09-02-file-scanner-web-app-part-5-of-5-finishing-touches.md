@@ -49,7 +49,7 @@ Dropzone.options.mydropzone = {
 and put the following into <tt>css/scanner.css</tt>
 {% highlight css %}
 .dropzone {
-    border-style:dotted; 
+    border-style:dotted;
     border-width:2px;
     min-height: 100px;
     height:100px;
@@ -105,7 +105,7 @@ Integrating DatatablesJS into our <tt>index.htm</tt> is a little painful the fir
 
 First the <tt>index.htm</tt> file.
 
-(Highlight lines:5,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,42)
+<!-- Highlight lines:5,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,42 -->
 
 {% highlight html linenos=table %}
 <html>
@@ -156,11 +156,11 @@ First the <tt>index.htm</tt> file.
 
 Now a small change to our <tt>scanner.css</tt>.
 
-(Highlight lines: 8)
+<!-- Highlight lines: 8 -->
 
 {% highlight css linenos=table %}
 .dropzone {
-    border-style:dotted; 
+    border-style:dotted;
     border-width:2px;
     min-height: 100px;
     height:100px;
@@ -171,7 +171,7 @@ tr.row_selected td {background-color:#ffff00}
 
 Our <tt>scanner.js</tt> requires a large addition.
 
-(Highlight lines: 15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44)
+<!-- Highlight lines: 15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44 -->
 
 {% highlight javascript linenos=table %}
 Dropzone.options.mydropzone = {

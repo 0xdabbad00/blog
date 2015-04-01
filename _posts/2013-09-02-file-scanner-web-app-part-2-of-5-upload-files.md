@@ -27,7 +27,7 @@ Now, let's edit our ugly <tt>index.htm</tt> to do something.
 
   <style>
   .dropzone {
-    border-style:dotted; 
+    border-style:dotted;
     border-width:2px;
     min-height: 100px;
     height:100px;
@@ -61,11 +61,11 @@ Dropzone.options.mydropzone = {
 
 Edit <tt>webserver.py</tt> to contain the following and restart the process.
 
-(highlight="10,11,12,13,14,15,18")
+<!-- highlight="10,11,12,13,14,15,18" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
- 
+
 import tornado.ioloop
 import tornado.web
 
@@ -74,20 +74,20 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("static/index.htm")
 
 
-class UploadHandler(tornado.web.RequestHandler):
-    def post(self):
-        file_contents = self.request.files['file'][0].body
-        with open("uploads/file", "wb") as f:
-            f.write(file_contents)
-        self.finish()
+class UploadHandler(tornado.web.RequestHandler):             # +
+    def post(self):                                          # +
+        file_contents = self.request.files['file'][0].body   # +
+        with open("uploads/file", "wb") as f:                # +
+            f.write(file_contents)                           # +
+        self.finish()                                        # +
 
- 
+
 application = tornado.web.Application([
-    (r"/file-upload", UploadHandler),
+    (r"/file-upload", UploadHandler),                        # +
     (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
@@ -112,9 +112,9 @@ use scanner;
 create table files (
   id INT NOT NULL AUTO_INCREMENT,
   submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  filename VARCHAR(30) NOT NULL DEFAULT "", 
-  size INT NOT NULL DEFAULT 0, 
-  md5 CHAR(32) NOT NULL DEFAULT "", 
+  filename VARCHAR(30) NOT NULL DEFAULT "",
+  size INT NOT NULL DEFAULT 0,
+  md5 CHAR(32) NOT NULL DEFAULT "",
   PRIMARY KEY(id)
 );
 </pre>
@@ -124,11 +124,11 @@ Initially, all we'll do in our database is store the filename given to us, and w
 <h3>Upload files with unique names</h3>
 Now we need to modify our <tt>webserver.py</tt> to use our database.
 
-(highlight="14,16,18,19,20,21,23,27,28,29,30,31")
+<!-- highlight="14,16,18,19,20,21,23,27,28,29,30,31") -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
- 
+
 import tornado.ioloop
 import tornado.web
 
@@ -160,13 +160,13 @@ db = MySQLdb.connect(host="localhost",
                       passwd="mypassword",
                       db="scanner")
 cur = db.cursor()
- 
+
 application = tornado.web.Application([
     (r"/file-upload", UploadHandler),
     (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()

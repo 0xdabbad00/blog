@@ -27,7 +27,7 @@ Skills you'll learn:
 </ul>
 <li><a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-2-of-5-upload-files/">Part 2</a>: Upload files
 <ul>
-<li><a href="http://www.dropzonejs.com/">DropzoneJS</a> for dragging and dropping files to a web app 
+<li><a href="http://www.dropzonejs.com/">DropzoneJS</a> for dragging and dropping files to a web app
 <li><a href="http://www.mysql.com/">MySQL</a> for a back-end database
 </ul>
 <li><a href="http://0xdabbad00.com/2013/09/02/file-scanner-web-app-part-3-of-5-yara-signatures/">Part 3</a>: YARA signatures
@@ -148,24 +148,24 @@ Reading our code from the bottom up, it is simply saying "Create a web server on
 <h3>Turn it into a static file server</h3>
 Right now, your webserver can't display any files.  It can only respond with "Hello world" and only if the client  tries to access "/".  Otherwise it gives a 404.  Let's turn our server into a static file server by killing the "python webserver.py" process, replacing the <tt>webserver.py</tt> file with the following and starting the process back up.
 
-(highlight="8,12")
+<!-- highlight="8,12" -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
- 
+
 import tornado.ioloop
 import tornado.web
- 
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("static/index.htm")
- 
+        self.render("static/index.htm") # + Render file
+
 
 application = tornado.web.Application([
     (r"/", MainHandler),
-    (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
+    (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}), # + File handler
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
 Now create a directory <tt>/var/apps/scanner/static</tt> and create a <tt>index.htm</tt> file there.  For example:
 {% highlight text %}
-echo &quot;&lt;html&gt;&lt;body bgcolor=yellow&gt;This is static&quot; &gt; /var/apps/scanner/static/index.htm
+echo "<html><body bgcolor=yellow>This is static" > /var/apps/scanner/static/index.htm
 {% endhighlight %}
 
 After starting the service back up, visit <a href="http://192.168.56.101:8000/">http://192.168.56.101:8000/</a> and you should see an ugly site with your text.
@@ -183,36 +183,36 @@ Tornado caches your files, so any time you edit that static <tt>index.htm</tt> f
 <h3>Handlers</h3>
 To give you a feel for how handlers in Tornado work, let's add two additional ones to our code.
 
-(highlight="5,11,12,13,15,16,17,20,21")
+<!-- highlight="5,11,12,13,15,16,17,20,21") -->
 
 {% highlight python linenos=table %}
 #!/usr/bin/python
- 
+
 import tornado.ioloop
 import tornado.web
-from datetime import datetime
+from datetime import datetime                      # +
 
- 
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("static/index.htm")
 
-class TimeHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("%s" % datetime.now())
- 
-class AdditionHandler(tornado.web.RequestHandler):
-    def get(self, num1, num2):
-        self.write("%d" % (int(num1)+int(num2)))
+class TimeHandler(tornado.web.RequestHandler):     # +
+    def get(self):                                 # +
+        self.write("%s" % datetime.now())          # +
 
- 
+class AdditionHandler(tornado.web.RequestHandler): # +
+    def get(self, num1, num2):                     # +
+        self.write("%d" % (int(num1)+int(num2)))   # +
+
+
 application = tornado.web.Application([
-    (r"/time", TimeHandler),
-    (r"/add/([0-9]+)\+([0-9]+)", AdditionHandler),
+    (r"/time", TimeHandler),                       # +
+    (r"/add/([0-9]+)\+([0-9]+)", AdditionHandler), # +
     (r"/", MainHandler),
     (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
 ])
- 
+
 if __name__ == "__main__":
     application.listen(8000)
     tornado.ioloop.IOLoop.instance().start()
