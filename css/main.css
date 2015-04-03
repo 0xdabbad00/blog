@@ -9,28 +9,81 @@
   margin: 0;
 }
 
-html, body { height: 100%; width: 100%;}
+body,
+html {
+    width: 100%;
+    height: 100%;
+    color: #444;
+}
 
-body {
-  background-color: #FFF;
-  font: 13.34px "Lato", Helvetica, Arial, sans-serif;
-  font-size: small;
-  font-weight: 400;
+body, blockquote,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 400;
+}
+
+.navbar {
+  margin-top: 10px;
+  border: none;
+  border-radius: 0;
+  background-color: #000000;
+  font-weight:bold;
+  font-family: Monaco, "Courier New", monospace;
+  color: #ffffff;
+  font-size: 18px;
+  box-shadow: 0 0 10px #888888;
+}
+
+.navbar-default  .navbar-nav li a {
+  color: #ffffff;
+}
+
+.sitename {
+ font-size: 22px;
+}
+
+.navbar-default  .navbar-nav li a:hover {
+  color: #ccc;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
 }
 
 
 .content h1.entry-title, .content  .post-title h2 {
   margin-top: 0px;
   font-size: 150%;
-  margin-left: -1.5em;
 }
 
-h1 {
-    font-size: 130%;
+.entry-content h1, .post h1 {
+    font-weight:bold;
+    font-size: 24px;
+    color: #000;
+    border-bottom: 1px solid #CCC;
 }
+
+.entry-content h1 + h2, .post h1 + h2 {
+  margin-top:0px;
+}
+
 
 h2 {
-  font-size: 110%;
+  font-weight:bold;
+  font-size: 14px;
+  margin-top: 50px;
+  margin-bottom: 5px;
+  color: #000;
+  display: inline-block;
+  border-bottom: 1px solid #CCC;
 }
 
 h3 {
@@ -44,12 +97,10 @@ h3 {
 
 h2, h3 {
   margin-top: 1em;
-  margin-left: -1em;
 }
 
 h4, h5, h6 {
   font-size: 90%;
-  margin-left: -0.5em;
 }
 
 p { margin: 1em 0; }
