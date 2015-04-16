@@ -15,6 +15,9 @@ meta:
 
 After completing the previous lessons we now have a full-scale web app where a user can upload a file, get it scanned, and if he knows the right URL's he can see the results.  But it's completely unusable because none of that data get's tied together and presentable for the user.  So it's time to do that and the remaining clean-up.
 
+
+
+
 <h3>Bootstrap</h3>
 First, we'll download Twitter's <a href="http://getbootstrap.com/">Bootstrap</a> library which will apply some CSS and make our site not look so ugly.  We'll also get jquery.
 

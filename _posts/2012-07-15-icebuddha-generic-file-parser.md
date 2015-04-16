@@ -10,6 +10,8 @@ published: true
 <h3>FileReader</h3>
 I have been working sporadically on a project for the past few months to see how far I can take a webapp.  As indicated in my post <a href="http://0xdabbad00.com/2012/03/18/html5-filereader/">HTML5 FileReader</a>, I have been interested in using the HTML5 FileReader functionality to read local files.  Using this feature, I created <a href="http://icebuddha.com">IceBuddha.com</a>.  This project began as a web-based hex-viewer for binary files that can be drag and dropped to the page.  When you initially drop a file, the first 1600 bytes are read, and as you scroll down, more and more of the file is read in.  This allows you to drop 20MB file with no performance impact, but this is going to make other functionality difficult, so I might change this.   For now, thank you <a href="http://imakewebthings.com/jquery-waypoints/">http://imakewebthings.com/jquery-waypoints/</a> for making a lot of the functionality for that possible.
 
+
+
 The cool part about using the FileReader functionality is everything is happening locally in javascript in your browser.  So once visit the site and you download a few 100K of javascript, you can drag and drop megs and megs of files to the site and you won't have to wait for them to upload to my public server and I won't have to pay for that band-width because that data is all staying local to your system.  This is a pretty cool concept... we'll see how far I can take it.
 
 <h3>Hex dump</h3>

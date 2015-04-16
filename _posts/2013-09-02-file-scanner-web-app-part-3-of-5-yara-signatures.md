@@ -11,6 +11,9 @@ published: true
 
 So far in this training series, we've created a web app in a VM that is capable of having files uploaded to it.   Now we're going to take some time away from our web app to play with <a href="https://code.google.com/p/yara-project/">YARA</a>.  YARA is basically just grep for binary files, and catered specifically to executables for malware identification.  It can just as easily scan PDF files or any other file type, and it can do things beyond just looking for malware signatures.  You use YARA to look for specific byte patterns of interest, which may indicate that it is similar to other files you've analyzed previously.  Black-listing, like what AV products do, is dying as a protection capability, but scanning for byte signatures will always have a place in providing some insight into otherwise unknown files.
 
+
+
+
 <h3>Install YARA</h3>
 First, on the guest, we need to get the development tools and some required libraries, then we'll download and build YARA.
 {% highlight text %}

@@ -11,6 +11,9 @@ published: true
 
 So far in this dev training, we stood up an Ubuntu VM and made a basic web service at <tt>/var/apps/scanner/webserver.py</tt>.  Now we'll change it from a simple static web server to something that can upload files.
 
+
+
+
 <h3>Upload files using DropzoneJS</h3>
 We'll use <a href="http://www.dropzonejs.com/">Dropzone.js</a> for uploading files.  Get a copy by running:
 <pre>

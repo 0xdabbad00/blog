@@ -15,6 +15,9 @@ meta:
 
 In the last part of this series we create a python script to scan files and update our DB.  In the previous parts we created a web app that you could upload files to.  Now it's time to combine those two components.  Our web app uses Tornado, which is single threaded, so if we just scanned files as they were uploaded from within that web app, we'd be blocking and our web app would appear dead until the file finished scanning.  For our current, small and specific set of rules, this isn't a problem, but for a large rule set, it'd be annoying.  So we'll use <a href="http://www.rabbitmq.com/">RabbitMQ</a> to do work queuing.
 
+
+
+
 Our web app will receive files from users, and then queue a message in RabbitMQ to tell it that someone should scan that file.  We'll have a separate process running that will wait for messages from RabbitMQ telling it to scan a file.  It's a basic producer/consumer process.
 
 <h3>Installing RabbitMQ</h3>

@@ -11,6 +11,9 @@ If you're like me, your daily in-take of infosec news high-lights new vulns, thi
 
 In this series I'm going to show how to quickly stand-up a web app that you can drag and drop files to that will get scanned using some <a href="https://code.google.com/p/yara-project/">YARA</a> signatures.  The value of this series is not so much in the end product as it is in learning how all these tools fit together and how you can build things quickly, with some polish along the way so your projects aren't just hacks that fall apart on the first power failure or when someone else tries to use it.  A lot of development today, especially for web-apps, is just gluing different components together:  Half the battle is knowing what to use to accomplish your goals, and the other half is just applying the glue.  This will teach some of both skills.
 
+
+
+
 To give you a better idea of what you'll be making, here is a screenshot of the final product.
 <a href="http://0xdabbad00.com/wp-content/uploads/2013/09/Screen-Shot-2013-09-02-at-3.30.33-PM.png"><img src="http://0xdabbad00.com/wp-content/uploads/2013/09/Screen-Shot-2013-09-02-at-3.30.33-PM-300x152.png" alt="" title="Finished app" width="300" height="152" class="aligncenter size-medium wp-image-1190" /></a>
 
