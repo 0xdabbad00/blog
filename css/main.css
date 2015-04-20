@@ -76,9 +76,13 @@ h6 {
 }
 
 
-.entry-content a, .post a {
+a {
   text-decoration: underline;
 }
+
+.navbar a {
+text-decoration: none;
+  }
 
 
 h2 {
@@ -93,10 +97,6 @@ h2 {
 
 h3 {
   font-size: 105%;
-}
-
-.content h1 {
-    margin-left: -1.5em;
 }
 
 
@@ -302,6 +302,7 @@ h1 .title {
 
 code {
   background: #f0f0f0;
+  color: #000000;
   padding: 0 .2em;
   border: 1px solid #ccc;
   border-radius: 2px;

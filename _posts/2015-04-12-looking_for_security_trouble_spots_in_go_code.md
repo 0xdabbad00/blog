@@ -71,7 +71,7 @@ layout.  I would not give that up lightly."
 
 go get falls back to http
 -------------------------
-[Dmitry Chestnykh](https://twitter.com/dchest) opened an [issue](https://github.com/golang/go/issues/9637) about how the `go get` command, which is used to download libaries, will fall back to up using http, unless the files are downloaded from github.com, code.google.com, bitbucket.org, launchpad.net, or JazzHub (hub.jazz.net/git).  The threat here is that developers could be MiTM'd so that access to https is blocked, causing the `go get` to fall back to http, allowing for the files to be manipulated. This is not so much a language problem, but something to be aware of.
+[Dmitry Chestnykh](https://twitter.com/dchest) opened an [issue](https://github.com/golang/go/issues/9637) about how the `go get` command, which is used to download libaries, will fall back to using http, unless the files are downloaded from github.com, code.google.com, bitbucket.org, launchpad.net, or JazzHub (hub.jazz.net/git).  The threat here is that developers could be MiTM'd so that access to https is blocked, causing the `go get` to fall back to http, allowing for the files to be manipulated. This is not so much a language problem, but something to be aware of.
 
 
 Conclusion
